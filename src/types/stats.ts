@@ -52,7 +52,6 @@ export interface CompanyStats {
 }
 
 export interface TopOffer {
-  studentName: string;
   company: string;
   ctc: number;
   offerType: OfferType;
