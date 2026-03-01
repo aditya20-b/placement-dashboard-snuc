@@ -18,12 +18,6 @@ import { CACHE_KEYS } from "@/lib/constants";
 export async function GET(request: Request) {
   try {
     const session = await getSession();
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { success: false, error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
-        { status: 401 }
-      );
-    }
 
     // CSRF check for non-GET (this is GET, but validate origin if present)
     const origin = request.headers.get("origin");
@@ -34,7 +28,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const isAdmin = session.user.role === "admin";
+    const isAdmin = session?.user?.role === "admin";
 
     const { data: students, cached } = await getCachedData(
       CACHE_KEYS.STUDENT_RECORDS,
