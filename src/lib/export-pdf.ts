@@ -819,10 +819,9 @@ export async function generatePDFReport(
 
     autoTable(doc, {
       startY: y,
-      head: [["#", "Student", "Company", "CTC", "Type"]],
+      head: [["#", "Company", "CTC", "Type"]],
       body: data.topOffers.map((o, i) => [
         String(i + 1),
-        o.studentName,
         o.company,
         pdfINR(o.ctc),
         o.offerType,
@@ -830,8 +829,8 @@ export async function generatePDFReport(
       ...ts,
       columnStyles: {
         0: { cellWidth: 10, halign: "center" },
-        3: { halign: "right", fontStyle: "bold" },
-        4: { cellWidth: 26 },
+        2: { halign: "right", fontStyle: "bold" },
+        3: { cellWidth: 26 },
       },
     });
 
