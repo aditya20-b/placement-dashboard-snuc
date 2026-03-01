@@ -49,13 +49,7 @@ export async function GET(request: Request) {
     const companyClassBreakdown = computeCompanyClassBreakdown(students);
     const timeline = computeTimelineStats(students);
 
-    // Anonymize top offers for non-admin
-    const safeTopOffers = isAdmin
-      ? topOffers
-      : topOffers.map((o, i) => ({
-          ...o,
-          studentName: `Student ${i + 1}`,
-        }));
+    const safeTopOffers = topOffers;
 
     return NextResponse.json({
       success: true,
