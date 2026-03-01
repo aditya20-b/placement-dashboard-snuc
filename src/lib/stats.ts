@@ -217,19 +217,24 @@ export function computeTopOffers(
   students: StudentRecord[],
   limit = 10
 ): TopOffer[] {
-  const allOffers: TopOffer[] = [];
+  // Deduplicate by company+ctc: keep only the highest CTC per company
+  const seen = new Map<string, TopOffer>();
   for (const student of students) {
     for (const offer of student.offers) {
       if (offer.offerType === "Internship") continue;
-      allOffers.push({
-        studentName: student.name,
-        company: offer.company,
-        ctc: offer.ctc,
-        offerType: offer.offerType,
-      });
+      const key = `${offer.company}::${offer.ctc}`;
+      if (!seen.has(key)) {
+        seen.set(key, {
+          company: offer.company,
+          ctc: offer.ctc,
+          offerType: offer.offerType,
+        });
+      }
     }
   }
-  return allOffers.sort((a, b) => b.ctc - a.ctc).slice(0, limit);
+  return Array.from(seen.values())
+    .sort((a, b) => b.ctc - a.ctc)
+    .slice(0, limit);
 }
 
 export function computeMultipleOfferStudents(
