@@ -3,6 +3,7 @@ import { poppins, inter, ibmPlexMono } from "@/lib/fonts";
 import { SessionProvider } from "@/providers/session-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -30,6 +31,7 @@ export default function RootLayout({
           </QueryProvider>
         </SessionProvider>
         <Toaster richColors position="top-right" />
+        <Analytics />
       </body>
     </html>
   );
