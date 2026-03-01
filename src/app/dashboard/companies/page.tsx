@@ -10,7 +10,8 @@ import { SortableHeader } from "@/components/dashboard/sortable-header";
 import { PageTransition } from "@/components/dashboard/page-transition";
 import { DataFreshness } from "@/components/dashboard/data-freshness";
 import { formatINRCompact, formatDate } from "@/lib/format";
-import { CHART_COLORS, VALID_CLASS_SECTIONS } from "@/lib/constants";
+import { CHART_COLORS, VALID_CLASS_SECTIONS, VALID_CLASSES } from "@/lib/constants";
+import { useGroupByClass } from "@/contexts/group-by-class-context";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import {
@@ -44,6 +45,7 @@ type CompanyRow = {
 
 export default function CompaniesPage() {
   const { data, isLoading, error } = useDashboardData();
+  const { groupByClass } = useGroupByClass();
   const [search, setSearch] = useState("");
 
   const filteredCompanies = useMemo(() => {
@@ -97,8 +99,22 @@ export default function CompaniesPage() {
     totalCompanies > 0 ? (totalOffers / totalCompanies).toFixed(2) : "0";
 
   // All companies for stacked bar chart
+  // When grouped: merge "AIDS A" + "AIDS B" → "AIDS", "IOT A" + "IOT B" → "IOT"
   const stackedBarData = companies.map((c) => {
     const breakdown = companyClassBreakdown[c.company] ?? {};
+    if (groupByClass) {
+      return {
+        name: c.company,
+        ...Object.fromEntries(
+          VALID_CLASSES.map((cls) => {
+            const total = VALID_CLASS_SECTIONS.filter((cs) =>
+              cs.startsWith(cls)
+            ).reduce((s, cs) => s + (breakdown[cs] ?? 0), 0);
+            return [cls, total];
+          })
+        ),
+      };
+    }
     return {
       name: c.company,
       ...Object.fromEntries(
@@ -106,6 +122,9 @@ export default function CompaniesPage() {
       ),
     };
   });
+
+  const activeClassKeys = groupByClass ? VALID_CLASSES : VALID_CLASS_SECTIONS;
+  const activeClassColors = groupByClass ? CHART_COLORS.classGrouped : CHART_COLORS.class;
 
   const chartHeight = Math.max(400, companies.length * 30);
 
@@ -137,7 +156,7 @@ export default function CompaniesPage() {
       {/* Company-wise offers stacked bar — all companies */}
       <ChartCard
         title="Company-Wise Offers (All Companies)"
-        description="Stacked by class section"
+        description={groupByClass ? "Stacked by class" : "Stacked by class section"}
       >
         <div className="max-h-[600px] overflow-y-auto">
           <div style={{ height: `${chartHeight}px` }}>
@@ -153,12 +172,12 @@ export default function CompaniesPage() {
                 />
                 <Tooltip />
                 <Legend />
-                {VALID_CLASS_SECTIONS.map((cs) => (
+                {activeClassKeys.map((cs) => (
                   <Bar
                     key={cs}
                     dataKey={cs}
                     stackId="a"
-                    fill={CHART_COLORS.class[cs]}
+                    fill={activeClassColors[cs as keyof typeof activeClassColors]}
                   />
                 ))}
               </BarChart>
