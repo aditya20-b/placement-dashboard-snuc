@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { DashboardNav } from "./nav";
+import { GroupByClassProvider } from "@/contexts/group-by-class-context";
 
 export default async function DashboardLayout({
   children,
@@ -9,20 +9,23 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const session = await getSession();
-  if (!session) {
-    redirect("/login");
-  }
+  const userRole = session?.user?.role ?? "viewer";
+  const userName = session?.user?.name ?? "Guest";
+  const userEmail = session?.user?.email ?? "";
 
   return (
-    <div className="min-h-screen bg-brand-gradient">
-      <DashboardNav
-        userName={session.user.name ?? "User"}
-        userEmail={session.user.email ?? ""}
-        userRole={session.user.role}
-      />
-      <main className="mx-auto max-w-7xl px-4 py-6 pb-20 sm:px-6 md:pb-6 lg:px-8">
-        {children}
-      </main>
-    </div>
+    <GroupByClassProvider>
+      <div className="min-h-screen bg-brand-gradient">
+        <DashboardNav
+          userName={userName}
+          userEmail={userEmail}
+          userRole={userRole}
+          isAuthenticated={!!session}
+        />
+        <main className="mx-auto max-w-7xl px-4 py-6 pb-20 sm:px-6 md:pb-6 lg:px-8">
+          {children}
+        </main>
+      </div>
+    </GroupByClassProvider>
   );
 }
