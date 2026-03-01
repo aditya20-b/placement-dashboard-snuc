@@ -73,43 +73,43 @@ export const CTC_BUCKETS = [
 // ─── Chart Colors ───────────────────────────────────────
 
 export const CHART_COLORS = {
-  /** Colors by class section */
+  /** Colors by class section — each adjacent color uses a distinct hue */
   class: {
-    "AIDS A": "#0056A2",
-    "AIDS B": "#3387CF",
-    "IOT A": "#D4A516",
-    "IOT B": "#F3C948",
-    CS: "#16A34A",
+    "AIDS A": "#2563EB",
+    "AIDS B": "#06B6D4",
+    "IOT A": "#F59E0B",
+    "IOT B": "#EF4444",
+    CS: "#10B981",
   } as Record<ClassSection, string>,
 
-  /** Sequential palette */
+  /** Sequential palette — vibrant, high-contrast */
   sequential: [
-    "#0056A2",
-    "#D4A516",
-    "#16A34A",
     "#2563EB",
-    "#D97706",
-    "#7C3AED",
-    "#DC2626",
-    "#0891B2",
+    "#F59E0B",
+    "#10B981",
+    "#EF4444",
+    "#8B5CF6",
+    "#EC4899",
+    "#06B6D4",
+    "#F97316",
   ],
 
   /** Status colors */
   status: {
-    Placed: "#16A34A",
-    "Not Placed": "#DC2626",
-    Hold: "#D97706",
-    Dropped: "#6C757D",
-    "LOR Issued": "#2563EB",
+    Placed: "#10B981",
+    "Not Placed": "#EF4444",
+    Hold: "#F59E0B",
+    Dropped: "#6B7280",
+    "LOR Issued": "#3B82F6",
   } as Record<Status, string>,
 
   /** Offer type colors */
   offerType: {
-    Regular: "#3387CF",
-    Dream: "#0056A2",
-    "Super Dream": "#D4A516",
-    Marquee: "#16A34A",
-    Internship: "#6C757D",
+    Regular: "#3B82F6",
+    Dream: "#8B5CF6",
+    "Super Dream": "#F59E0B",
+    Marquee: "#10B981",
+    Internship: "#6B7280",
   } as Record<OfferType, string>,
 };
 

@@ -7,10 +7,11 @@ import { DashboardSkeleton } from "@/components/dashboard/loading-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, FileDown, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Shield, FileDown, FileSpreadsheet, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDFReport, generateCSV } from "@/lib/export-pdf";
 import { formatINRCompact } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { StudentRecord } from "@/types";
 
 const SECTION_OPTIONS = [
@@ -41,12 +42,17 @@ export default function ExportPage() {
 
   if (!isAdmin) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 rounded-lg border bg-white p-12">
-        <Shield className="h-12 w-12 text-muted-foreground" />
-        <h2 className="font-heading text-xl font-semibold">Admin Access Required</h2>
-        <p className="text-muted-foreground">
-          PDF export is restricted to placement cell staff.
-        </p>
+      <div className="overflow-hidden rounded-lg border border-border/50 bg-white shadow-md">
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-gold-400" />
+        <div className="flex flex-col items-center justify-center gap-4 p-12">
+          <div className="rounded-full bg-blue-50 p-3 ring-4 ring-blue-500/5">
+            <Shield className="h-12 w-12 text-blue-500" />
+          </div>
+          <h2 className="font-heading text-xl font-semibold">Admin Access Required</h2>
+          <p className="text-muted-foreground">
+            PDF export is restricted to placement cell staff.
+          </p>
+        </div>
       </div>
     );
   }
@@ -54,8 +60,11 @@ export default function ExportPage() {
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data) {
     return (
-      <div className="rounded-lg border bg-white p-6 text-center">
-        <p className="text-error">Failed to load data for export.</p>
+      <div className="overflow-hidden rounded-lg border border-border/50 bg-white shadow-md">
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-gold-400" />
+        <div className="p-6 text-center">
+          <p className="text-error">Failed to load data for export.</p>
+        </div>
       </div>
     );
   }
@@ -131,10 +140,17 @@ export default function ExportPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-warning">
-          Admin Access 
-        </span>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-heading text-3xl font-semibold text-gray-900">
+            Export
+          </h1>
+          <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-blue-500 to-gold-400" />
+        </div>
+        <Badge className="bg-amber-100 text-amber-800 border border-amber-300">
+          <Sparkles className="h-3 w-3" />
+          Admin Access
+        </Badge>
       </div>
 
       <Card>
@@ -152,7 +168,12 @@ export default function ExportPage() {
             {SECTION_OPTIONS.map((option) => (
               <label
                 key={option.key}
-                className="flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors hover:bg-gray-50"
+                className={cn(
+                  "flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors",
+                  sections[option.key]
+                    ? "border-blue-200 bg-blue-50/50"
+                    : "hover:border-gray-300 hover:bg-blue-50/30"
+                )}
               >
                 <input
                   type="checkbox"
@@ -175,7 +196,7 @@ export default function ExportPage() {
             <Button
               onClick={handlePDFExport}
               disabled={generating || selectedCount === 0}
-              className="bg-blue-500 hover:bg-blue-600"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-200"
             >
               {generating ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -59,19 +59,24 @@ export function DashboardNav({
   return (
     <>
       {/* Top nav bar */}
-      <nav className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="flex items-center gap-2">
               <Image
                 src="/logo_blue.png"
                 alt="SNU Chennai"
-                width={32}
-                height={32}
+                width={40}
+                height={40}
               />
-              <span className="hidden font-heading text-lg font-semibold text-blue-500 sm:inline">
-                Placement Dashboard
-              </span>
+              <div className="hidden items-center gap-1.5 sm:flex">
+                <span className="font-heading text-xl font-semibold text-blue-500">
+                  Placement Dashboard
+                </span>
+                <span className="ml-2 text-xs text-muted-foreground">
+                  Batch 2022-26
+                </span>
+              </div>
             </Link>
 
             {/* Desktop nav links */}
@@ -83,10 +88,10 @@ export function DashboardNav({
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                      "flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-all duration-150",
                       isActive(item.href)
-                        ? "bg-blue-50 text-blue-500"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        ? "border-blue-500/20 bg-blue-500 text-white shadow-sm"
+                        : "border-transparent text-gray-600 hover:border-gray-200 hover:bg-gray-50 hover:text-gray-900"
                     )}
                   >
                     {Icon && <Icon className="h-4 w-4" />}
@@ -101,7 +106,7 @@ export function DashboardNav({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500 text-xs font-medium text-white">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-medium text-white">
                   {userName.charAt(0).toUpperCase()}
                 </div>
                 <span className="hidden text-sm sm:inline">{userName}</span>
@@ -130,10 +135,14 @@ export function DashboardNav({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        {/* Gradient accent bar */}
+        <div className="h-[3px] bg-gradient-to-r from-blue-500 to-gold-400" />
       </nav>
 
       {/* Mobile bottom tab bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl md:hidden">
+        {/* Gradient top border */}
+        <div className="h-[3px] bg-gradient-to-r from-blue-500 to-gold-400" />
         <div className="flex items-center justify-around py-1">
           {visibleItems.slice(0, 5).map((item) => {
             const Icon = NAV_ICONS[item.href] ?? LayoutDashboard;
@@ -145,7 +154,7 @@ export function DashboardNav({
                 className={cn(
                   "flex flex-col items-center gap-0.5 px-2 py-1.5 text-xs transition-colors",
                   active
-                    ? "text-blue-500"
+                    ? "text-blue-500 bg-blue-50 rounded-lg"
                     : "text-gray-500"
                 )}
               >

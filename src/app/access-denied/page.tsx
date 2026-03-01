@@ -10,8 +10,9 @@ export default function AccessDeniedPage() {
   const router = useRouter();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-gold-50">
-      <Card className="mx-4 w-full max-w-md shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-brand-gradient">
+      <Card className="mx-4 w-full max-w-md overflow-hidden shadow-lg">
+        <div className="h-1 bg-gradient-to-r from-blue-500 via-blue-400 to-gold-400" />
         <CardHeader className="items-center space-y-4 pb-2">
           <Image
             src="/logo.png"
@@ -21,7 +22,7 @@ export default function AccessDeniedPage() {
             priority
           />
 
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error-light">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error-light shadow-lg shadow-error/10 ring-4 ring-error/5">
             <svg
               className="h-8 w-8 text-error"
               fill="none"

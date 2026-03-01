@@ -15,7 +15,10 @@ export default async function LoginPage({
   const params = await searchParams;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-gold-50">
+    <div className="relative flex min-h-screen items-center justify-center bg-brand-gradient-bold overflow-hidden">
+      {/* Decorative blur orbs */}
+      <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl" />
+      <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-gold-400/20 blur-3xl" />
       <LoginCard
         error={params.error}
         callbackUrl={params.callbackUrl}

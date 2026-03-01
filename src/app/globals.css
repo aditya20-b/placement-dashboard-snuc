@@ -149,3 +149,27 @@ h1, h2, h3, h4, h5, h6 {
     @apply bg-background text-foreground;
   }
 }
+
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #E6F0F9 0%, #f0f4ff 40%, #FDF6E0 100%);
+}
+.bg-brand-gradient-bold {
+  background: linear-gradient(135deg, #0056A2 0%, #003A6B 50%, #001F37 100%);
+}
+.bg-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+}
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, #0056A2 0%, #D4A516 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shadow-brand {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 86, 162, 0.08),
+    0 2px 4px -2px rgba(0, 86, 162, 0.05);
+}

@@ -17,6 +17,7 @@ export function ChartCard({
 }: ChartCardProps) {
   return (
     <Card className={cn("overflow-hidden", className)}>
+      <div className="h-1 bg-gradient-to-r from-blue-500 to-gold-400" />
       <CardHeader className="pb-2">
         <CardTitle className="font-heading text-lg">{title}</CardTitle>
         {description && (

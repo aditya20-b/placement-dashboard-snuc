@@ -7,6 +7,8 @@ import { DashboardSkeleton } from "@/components/dashboard/loading-skeleton";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { SortableHeader } from "@/components/dashboard/sortable-header";
+import { PageTransition } from "@/components/dashboard/page-transition";
+import { DataFreshness } from "@/components/dashboard/data-freshness";
 import { formatINRCompact, formatDate } from "@/lib/format";
 import { CHART_COLORS, VALID_CLASS_SECTIONS } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
@@ -79,8 +81,11 @@ export default function CompaniesPage() {
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data) {
     return (
-      <div className="rounded-lg border bg-white p-6 text-center">
-        <p className="text-error">Failed to load company data.</p>
+      <div className="overflow-hidden rounded-lg border border-border/50 bg-white shadow-md">
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-gold-400" />
+        <div className="p-6 text-center">
+          <p className="text-error">Failed to load company data.</p>
+        </div>
       </div>
     );
   }
@@ -105,7 +110,19 @@ export default function CompaniesPage() {
   const chartHeight = Math.max(400, companies.length * 30);
 
   return (
+    <PageTransition>
     <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-heading text-3xl font-semibold text-gray-900">
+            Companies
+          </h1>
+          <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-blue-500 to-gold-400" />
+        </div>
+        <DataFreshness timestamp={data.timestamp} />
+      </div>
+
       {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard title="Companies Visited" value={totalCompanies} />
@@ -197,5 +214,6 @@ export default function CompaniesPage() {
         </div>
       </ChartCard>
     </div>
+    </PageTransition>
   );
 }

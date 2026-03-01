@@ -67,8 +67,11 @@ export default function CTCPage() {
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data) {
     return (
-      <div className="rounded-lg border bg-white p-6 text-center">
-        <p className="text-error">Failed to load CTC data.</p>
+      <div className="overflow-hidden rounded-lg border border-border/50 bg-white shadow-md">
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-gold-400" />
+        <div className="p-6 text-center">
+          <p className="text-error">Failed to load CTC data.</p>
+        </div>
       </div>
     );
   }
@@ -93,23 +96,26 @@ export default function CTCPage() {
         }))
     );
 
-  // Blue gradient for histogram
-  const blueGradient = [
-    "#CCE1F3",
-    "#99C3E7",
-    "#66A5DB",
-    "#3387CF",
-    "#0056A2",
-    "#003A6B",
+  // Vibrant multi-hue for histogram
+  const histogramColors = [
+    "#93C5FD",
+    "#3B82F6",
+    "#10B981",
+    "#F59E0B",
+    "#EF4444",
+    "#7C3AED",
   ];
 
   return (
     <PageTransition>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-heading text-2xl font-semibold text-gray-900">
-          CTC Analytics
-        </h1>
+        <div>
+          <h1 className="font-heading text-3xl font-semibold text-gray-900">
+            CTC Analytics
+          </h1>
+          <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-blue-500 to-gold-400" />
+        </div>
         <DataFreshness timestamp={data.timestamp} />
       </div>
 
@@ -155,7 +161,7 @@ export default function CTCPage() {
                 {ctc.bucketDistribution.map((_, i) => (
                   <Cell
                     key={i}
-                    fill={blueGradient[i % blueGradient.length]}
+                    fill={histogramColors[i % histogramColors.length]}
                   />
                 ))}
               </Bar>

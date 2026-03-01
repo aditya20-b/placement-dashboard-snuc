@@ -73,11 +73,25 @@ export function StatCard({
     >
       <Card
         className={cn(
-          "transition-all duration-200 hover:shadow-md hover:-translate-y-0.5",
+          "overflow-hidden border-l-4 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5",
+          iconColor === "text-blue-500" && "border-l-blue-500",
+          iconColor === "text-blue-400" && "border-l-blue-400",
+          iconColor === "text-blue-300" && "border-l-blue-300",
+          iconColor === "text-gold-500" && "border-l-gold-400",
+          iconColor === "text-purple-500" && "border-l-purple-500",
+          iconColor === "text-green-500" && "border-l-green-500",
+          iconColor === "text-red-500" && "border-l-red-500",
+          iconColor === "text-gray-500" && "border-l-gray-400",
+          iconColor === "text-gray-400" && "border-l-gray-400",
+          iconColor === "text-success" && "border-l-green-500",
+          iconColor === "text-error" && "border-l-red-500",
+          iconColor === "text-warning" && "border-l-amber-500",
+          iconColor === "text-info" && "border-l-blue-500",
           className
         )}
       >
-        <CardContent className="pt-6">
+        <div className="h-0.5 bg-gradient-to-r from-blue-500 to-gold-400" />
+        <CardContent className="pt-5">
           <div className="flex items-start justify-between">
             <div className="min-w-0">
               <p className="text-sm font-medium text-muted-foreground truncate">
@@ -95,7 +109,23 @@ export function StatCard({
               )}
             </div>
             {Icon && (
-              <div className={cn("rounded-lg bg-gray-50 p-2", iconColor)}>
+              <div className={cn(
+                "rounded-lg p-2",
+                iconColor === "text-blue-500" && "bg-blue-50",
+                iconColor === "text-blue-400" && "bg-blue-50",
+                iconColor === "text-blue-300" && "bg-blue-50",
+                iconColor === "text-gold-500" && "bg-gold-50",
+                iconColor === "text-purple-500" && "bg-purple-50",
+                iconColor === "text-green-500" && "bg-green-50",
+                iconColor === "text-red-500" && "bg-red-50",
+                iconColor === "text-gray-500" && "bg-gray-100",
+                iconColor === "text-gray-400" && "bg-gray-100",
+                iconColor === "text-success" && "bg-green-50",
+                iconColor === "text-error" && "bg-red-50",
+                iconColor === "text-warning" && "bg-amber-50",
+                iconColor === "text-info" && "bg-blue-50",
+                iconColor
+              )}>
                 <Icon className="h-5 w-5" />
               </div>
             )}

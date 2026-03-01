@@ -51,12 +51,12 @@ import {
 } from "@/components/ui/table";
 
 const CLASSWISE_COLORS: Record<string, string> = {
-  Placed: "#16A34A",
-  "Not Placed": "#DC2626",
-  Hold: "#D97706",
-  Dropped: "#6C757D",
-  "Higher Studies": "#7C3AED",
-  "Placement Exempt": "#0891B2",
+  Placed: "#10B981",
+  "Not Placed": "#EF4444",
+  Hold: "#F59E0B",
+  Dropped: "#6B7280",
+  "Higher Studies": "#8B5CF6",
+  "Placement Exempt": "#06B6D4",
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,11 +123,14 @@ export default function OverviewPage() {
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data) {
     return (
-      <div className="rounded-lg border bg-white p-6 text-center">
-        <p className="text-error">Failed to load dashboard data.</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {error?.message ?? "Please try again later."}
-        </p>
+      <div className="overflow-hidden rounded-lg border border-border/50 bg-white shadow-md">
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-gold-400" />
+        <div className="p-6 text-center">
+          <p className="text-error">Failed to load dashboard data.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {error?.message ?? "Please try again later."}
+          </p>
+        </div>
       </div>
     );
   }
@@ -240,9 +243,12 @@ export default function OverviewPage() {
       <div className="space-y-6">
         {/* Header with freshness indicator */}
         <div className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-semibold text-gray-900">
-            Overview
-          </h1>
+          <div>
+            <h1 className="font-heading text-3xl font-semibold text-gray-900">
+              Overview
+            </h1>
+            <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-blue-500 to-gold-400" />
+          </div>
           <DataFreshness timestamp={data.timestamp} />
         </div>
 
@@ -572,11 +578,14 @@ export default function OverviewPage() {
                       if (!active || !payload?.length) return null;
                       const d = payload[0].payload;
                       return (
-                        <div className="rounded-lg border bg-white p-3 text-sm shadow-md">
-                          <p className="font-semibold">{d.company}</p>
-                          <p className="text-muted-foreground">{d.date}</p>
-                          <p>Offers: {d.count}</p>
-                          {d.ctc > 0 && <p>Max CTC: {formatINRCompact(d.ctc)}</p>}
+                        <div className="flex overflow-hidden rounded-lg border border-border/50 bg-white text-sm shadow-lg">
+                          <div className="w-1 bg-gradient-to-b from-blue-500 to-gold-400" />
+                          <div className="p-3">
+                            <p className="font-semibold">{d.company}</p>
+                            <p className="text-muted-foreground">{d.date}</p>
+                            <p>Offers: {d.count}</p>
+                            {d.ctc > 0 && <p>Max CTC: {formatINRCompact(d.ctc)}</p>}
+                          </div>
                         </div>
                       );
                     }}

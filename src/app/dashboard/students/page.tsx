@@ -31,6 +31,7 @@ import {
   UserX,
   GraduationCap,
   ShieldOff,
+  Sparkles,
 } from "lucide-react";
 import {
   Table,
@@ -261,12 +262,17 @@ export default function StudentsPage() {
 
   if (!isAdmin) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 rounded-lg border bg-white p-12">
-        <Shield className="h-12 w-12 text-muted-foreground" />
-        <h2 className="font-heading text-xl font-semibold">Admin Access Required</h2>
-        <p className="text-muted-foreground">
-          This page is restricted to placement cell staff.
-        </p>
+      <div className="overflow-hidden rounded-lg border border-border/50 bg-white shadow-md">
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-gold-400" />
+        <div className="flex flex-col items-center justify-center gap-4 p-12">
+          <div className="rounded-full bg-blue-50 p-3 ring-4 ring-blue-500/5">
+            <Shield className="h-12 w-12 text-blue-500" />
+          </div>
+          <h2 className="font-heading text-xl font-semibold">Admin Access Required</h2>
+          <p className="text-muted-foreground">
+            This page is restricted to placement cell staff.
+          </p>
+        </div>
       </div>
     );
   }
@@ -274,18 +280,28 @@ export default function StudentsPage() {
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data) {
     return (
-      <div className="rounded-lg border bg-white p-6 text-center">
-        <p className="text-error">Failed to load student data.</p>
+      <div className="overflow-hidden rounded-lg border border-border/50 bg-white shadow-md">
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-gold-400" />
+        <div className="p-6 text-center">
+          <p className="text-error">Failed to load student data.</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-warning">
-          Admin Access 
-        </span>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-heading text-3xl font-semibold text-gray-900">
+            Students
+          </h1>
+          <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-blue-500 to-gold-400" />
+        </div>
+        <Badge className="bg-amber-100 text-amber-800 border border-amber-300">
+          <Sparkles className="h-3 w-3" />
+          Admin Access
+        </Badge>
       </div>
 
       {/* Summary stat cards */}
@@ -451,7 +467,7 @@ export default function StudentsPage() {
                                   {student.offers.map((offer, j) => (
                                     <div
                                       key={j}
-                                      className="rounded-md border bg-white p-3"
+                                      className="rounded-md border border-l-2 border-l-blue-500 bg-white p-3"
                                     >
                                       <p className="font-medium">
                                         {offer.company}
