@@ -14,12 +14,12 @@ const GroupByClassContext = createContext<GroupByClassContextValue>({
 });
 
 export function GroupByClassProvider({ children }: { children: ReactNode }) {
-  const [groupByClass, setGroupByClass] = useState(false);
+  const [groupByClass, setGroupByClass] = useState(true);
 
-  // Persist preference in localStorage
+  // Persist preference in localStorage (default: true)
   useEffect(() => {
     const stored = localStorage.getItem("groupByClass");
-    if (stored === "true") setGroupByClass(true);
+    if (stored === "false") setGroupByClass(false);
   }, []);
 
   const toggleGroupByClass = () => {

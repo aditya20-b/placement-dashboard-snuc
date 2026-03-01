@@ -37,14 +37,17 @@ export function DataFreshness({ timestamp }: { timestamp?: string }) {
         variant="ghost"
         size="sm"
         onClick={toggleGroupByClass}
-        title={groupByClass ? "Show sections (A/B)" : "Group by class (AIDS / IOT / CS)"}
-        className="h-6 px-1.5"
+        title={groupByClass ? "Show sections (AIDS A/B, IOT A/B)" : "Group by class (AIDS, IOT, CS)"}
+        className={`h-6 px-1.5 gap-1 ${groupByClass ? "text-blue-500" : "text-muted-foreground"}`}
       >
         {groupByClass ? (
-          <Layers2 className="h-3.5 w-3.5 text-blue-500" />
+          <Layers2 className="h-3.5 w-3.5" />
         ) : (
           <Layers className="h-3.5 w-3.5" />
         )}
+        <span className="hidden sm:inline">
+          {groupByClass ? "By Class" : "By Section"}
+        </span>
       </Button>
       <Button
         variant="ghost"
