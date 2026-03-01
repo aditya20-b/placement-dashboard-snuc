@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/table";
 
 type PercentileRow = { percent: number; average: number };
-type TopOfferRow = { rank: number; studentName: string; company: string; ctc: number; offerType: string };
+type TopOfferRow = { rank: number; company: string; ctc: number; offerType: string };
 
 export default function CTCPage() {
   const { data, isLoading, error } = useDashboardData();
@@ -56,13 +56,12 @@ export default function CTCPage() {
     if (!data) return [];
     return data.topOffers.map((o, i) => ({
       rank: i + 1,
-      studentName: o.studentName,
       company: o.company,
       ctc: o.ctc,
       offerType: o.offerType,
     }));
   }, [data]);
-  const topOfferSort = useTableSort<TopOfferRow, "studentName" | "company" | "ctc" | "offerType">(topOfferRows);
+  const topOfferSort = useTableSort<TopOfferRow, "company" | "ctc" | "offerType">(topOfferRows);
 
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data) {
@@ -269,7 +268,6 @@ export default function CTCPage() {
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
-              <SortableHeader label="Student" sortDirection={topOfferSort.getSortIndicator("studentName")} onSort={() => topOfferSort.requestSort("studentName")} />
               <SortableHeader label="Company" sortDirection={topOfferSort.getSortIndicator("company")} onSort={() => topOfferSort.requestSort("company")} />
               <SortableHeader label="CTC" sortDirection={topOfferSort.getSortIndicator("ctc")} onSort={() => topOfferSort.requestSort("ctc")} className="text-right" />
               <SortableHeader label="Type" sortDirection={topOfferSort.getSortIndicator("offerType")} onSort={() => topOfferSort.requestSort("offerType")} />
@@ -279,10 +277,7 @@ export default function CTCPage() {
             {topOfferSort.sortedData.map((offer, i) => (
               <TableRow key={i}>
                 <TableCell>{i + 1}</TableCell>
-                <TableCell className="font-medium">
-                  {offer.studentName}
-                </TableCell>
-                <TableCell>{offer.company}</TableCell>
+                <TableCell className="font-medium">{offer.company}</TableCell>
                 <TableCell className="text-right font-mono">
                   {formatINRCompact(offer.ctc)}
                 </TableCell>
