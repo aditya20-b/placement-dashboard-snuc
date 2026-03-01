@@ -82,6 +82,13 @@ export const CHART_COLORS = {
     CS: "#10B981",
   } as Record<ClassSection, string>,
 
+  /** Colors when grouped by class (no section split) */
+  classGrouped: {
+    AIDS: "#2563EB",
+    IOT: "#F59E0B",
+    CS: "#10B981",
+  } as Record<string, string>,
+
   /** Sequential palette — vibrant, high-contrast */
   sequential: [
     "#2563EB",
