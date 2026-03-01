@@ -1,13 +1,15 @@
 "use client";
 
-import { RefreshCw, Clock } from "lucide-react";
+import { RefreshCw, Clock, Layers, Layers2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useGroupByClass } from "@/contexts/group-by-class-context";
 
 export function DataFreshness({ timestamp }: { timestamp?: string }) {
   const queryClient = useQueryClient();
   const [refreshing, setRefreshing] = useState(false);
+  const { groupByClass, toggleGroupByClass } = useGroupByClass();
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -31,6 +33,19 @@ export function DataFreshness({ timestamp }: { timestamp?: string }) {
       ) : (
         <span>Loading...</span>
       )}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={toggleGroupByClass}
+        title={groupByClass ? "Show sections (A/B)" : "Group by class (AIDS / IOT / CS)"}
+        className="h-6 px-1.5"
+      >
+        {groupByClass ? (
+          <Layers2 className="h-3.5 w-3.5 text-blue-500" />
+        ) : (
+          <Layers className="h-3.5 w-3.5" />
+        )}
+      </Button>
       <Button
         variant="ghost"
         size="sm"
