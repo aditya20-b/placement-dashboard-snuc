@@ -12,6 +12,7 @@ import {
   Building2,
   Users,
   FileDown,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,10 +39,12 @@ export function DashboardNav({
   userName,
   userEmail,
   userRole,
+  isAuthenticated,
 }: {
   userName: string;
   userEmail: string;
   userRole: Role;
+  isAuthenticated: boolean;
 }) {
   const pathname = usePathname();
 
@@ -103,37 +106,47 @@ export function DashboardNav({
           </div>
 
           {/* User menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-medium text-white">
-                  {userName.charAt(0).toUpperCase()}
+          {!isAuthenticated ? (
+            <Button asChild variant="outline" size="sm" className="gap-2">
+              <Link href="/login">
+                <KeyRound className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign in for Admin</span>
+                <span className="sm:hidden">Sign in</span>
+              </Link>
+            </Button>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-medium text-white">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="hidden text-sm sm:inline">{userName}</span>
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-medium">{userName}</p>
+                  <p className="text-xs text-muted-foreground">{userEmail}</p>
+                  <Badge
+                    variant={userRole === "admin" ? "default" : "secondary"}
+                    className="mt-1"
+                  >
+                    {userRole === "admin" ? "Admin" : "Viewer"}
+                  </Badge>
                 </div>
-                <span className="hidden text-sm sm:inline">{userName}</span>
-                <ChevronDown className="h-4 w-4 text-gray-400" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{userName}</p>
-                <p className="text-xs text-muted-foreground">{userEmail}</p>
-                <Badge
-                  variant={userRole === "admin" ? "default" : "secondary"}
-                  className="mt-1"
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="text-error"
                 >
-                  {userRole === "admin" ? "Admin" : "Viewer"}
-                </Badge>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => signOut({ callbackUrl: "/login" })}
-                className="text-error"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
         {/* Gradient accent bar */}
         <div className="h-[3px] bg-gradient-to-r from-blue-500 to-gold-400" />
