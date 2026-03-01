@@ -12,22 +12,11 @@ import {
   computeTimelineStats,
 } from "@/lib/stats";
 import { getCachedData } from "@/lib/cache";
-import { validateOrigin } from "@/lib/csrf";
 import { CACHE_KEYS } from "@/lib/constants";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const session = await getSession();
-
-    // CSRF check for non-GET (this is GET, but validate origin if present)
-    const origin = request.headers.get("origin");
-    if (origin && !validateOrigin(request)) {
-      return NextResponse.json(
-        { success: false, error: { code: "FORBIDDEN", message: "Invalid origin" } },
-        { status: 403 }
-      );
-    }
-
     const isAdmin = session?.user?.role === "admin";
 
     const { data: students, cached } = await getCachedData(
