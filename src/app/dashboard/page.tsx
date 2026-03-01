@@ -11,6 +11,8 @@ import {
   StaggerItem,
 } from "@/components/dashboard/page-transition";
 import { CHART_COLORS } from "@/lib/constants";
+import { useGroupByClass } from "@/contexts/group-by-class-context";
+import type { ClassStats } from "@/types/stats";
 import { formatINRCompact } from "@/lib/format";
 import { DataFreshness } from "@/components/dashboard/data-freshness";
 import { useTableSort } from "@/hooks/use-table-sort";
@@ -95,13 +97,73 @@ type ClassRow = {
   femalePlacedPercent: number;
 };
 
+type MergedClassStats = Omit<ClassStats, "classSection"> & { classSection: string };
+
+function mergeClassStats(stats: ClassStats[]): MergedClassStats[] {
+  const groups: Record<string, ClassStats[]> = {};
+  for (const cs of stats) {
+    // "AIDS A" / "AIDS B" → "AIDS", "IOT A" / "IOT B" → "IOT", "CS" → "CS"
+    const key = cs.classSection.split(" ")[0];
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(cs);
+  }
+  return Object.entries(groups).map(([key, rows]) => {
+    const total = rows.reduce((s, r) => s + r.total, 0);
+    const male = rows.reduce((s, r) => s + r.male, 0);
+    const female = rows.reduce((s, r) => s + r.female, 0);
+    const optedPlacement = rows.reduce((s, r) => s + r.optedPlacement, 0);
+    const optedHigherStudies = rows.reduce((s, r) => s + r.optedHigherStudies, 0);
+    const placementExempt = rows.reduce((s, r) => s + r.placementExempt, 0);
+    const placed = rows.reduce((s, r) => s + r.placed, 0);
+    const notPlaced = rows.reduce((s, r) => s + r.notPlaced, 0);
+    const hold = rows.reduce((s, r) => s + r.hold, 0);
+    const dropped = rows.reduce((s, r) => s + r.dropped, 0);
+    const offers = rows.reduce((s, r) => s + r.offers, 0);
+    // Recompute percentages from summed values
+    const malePlaced = rows.reduce((s, r) => {
+      const maleOpted = r.male > 0 ? r.optedPlacement * (r.male / r.total) : 0;
+      return s + (maleOpted > 0 ? (r.malePlacedPercent / 100) * maleOpted : 0);
+    }, 0);
+    const femPlaced = rows.reduce((s, r) => {
+      const femOpted = r.female > 0 ? r.optedPlacement * (r.female / r.total) : 0;
+      return s + (femOpted > 0 ? (r.femalePlacedPercent / 100) * femOpted : 0);
+    }, 0);
+    const maleOpted = male > 0 && total > 0 ? optedPlacement * (male / total) : 0;
+    const femOpted = female > 0 && total > 0 ? optedPlacement * (female / total) : 0;
+    return {
+      classSection: key,
+      total,
+      male,
+      female,
+      optedPlacement,
+      optedHigherStudies,
+      placementExempt,
+      placed,
+      notPlaced,
+      hold,
+      dropped,
+      offers,
+      placementPercent: optedPlacement > 0 ? (placed / optedPlacement) * 100 : 0,
+      malePlacedPercent: maleOpted > 0 ? (malePlaced / maleOpted) * 100 : 0,
+      femalePlacedPercent: femOpted > 0 ? (femPlaced / femOpted) * 100 : 0,
+    };
+  });
+}
+
 export default function OverviewPage() {
   const { data, isLoading, error } = useDashboardData();
+  const { groupByClass } = useGroupByClass();
 
   // Hooks must be called before any early returns
+  const activeClassStats = useMemo((): MergedClassStats[] => {
+    if (!data) return [];
+    if (groupByClass) return mergeClassStats(data.overview.classwiseStats);
+    return data.overview.classwiseStats.map((cs) => ({ ...cs }));
+  }, [data, groupByClass]);
+
   const classwiseRows = useMemo<ClassRow[]>(() => {
     if (!data) return [];
-    return data.overview.classwiseStats.map((cs) => ({
+    return activeClassStats.map((cs) => ({
       classSection: cs.classSection,
       total: cs.total,
       male: cs.male,
@@ -117,7 +179,7 @@ export default function OverviewPage() {
       malePlacedPercent: cs.malePlacedPercent,
       femalePlacedPercent: cs.femalePlacedPercent,
     }));
-  }, [data]);
+  }, [activeClassStats]);
   const classSort = useTableSort<ClassRow, keyof ClassRow>(classwiseRows);
 
   if (isLoading) return <DashboardSkeleton />;
@@ -137,12 +199,14 @@ export default function OverviewPage() {
 
   const { overview } = data;
 
-  const placementBarData = overview.classwiseStats.map((cs) => ({
+  const classColors = groupByClass ? CHART_COLORS.classGrouped : CHART_COLORS.class;
+
+  const placementBarData = activeClassStats.map((cs) => ({
     name: cs.classSection,
     "Placement %": Number(cs.placementPercent.toFixed(1)),
   }));
 
-  const classwiseOverviewData = overview.classwiseStats.map((cs) => ({
+  const classwiseOverviewData = activeClassStats.map((cs) => ({
     name: cs.classSection,
     Placed: cs.placed,
     "Not Placed": cs.notPlaced,
@@ -153,7 +217,7 @@ export default function OverviewPage() {
     total: cs.total,
   }));
 
-  const genderData = overview.classwiseStats.map((cs) => ({
+  const genderData = activeClassStats.map((cs) => ({
     name: cs.classSection,
     "Male %": Number(cs.malePlacedPercent.toFixed(1)),
     "Female %": Number(cs.femalePlacedPercent.toFixed(1)),
@@ -162,38 +226,38 @@ export default function OverviewPage() {
   const statusData = [
     {
       name: "Placed",
-      value: overview.classwiseStats.reduce((s, c) => s + c.placed, 0),
+      value: activeClassStats.reduce((s, c) => s + c.placed, 0),
       color: CHART_COLORS.status.Placed,
     },
     {
       name: "Not Placed",
-      value: overview.classwiseStats.reduce((s, c) => s + c.notPlaced, 0),
+      value: activeClassStats.reduce((s, c) => s + c.notPlaced, 0),
       color: CHART_COLORS.status["Not Placed"],
     },
     {
       name: "Hold",
-      value: overview.classwiseStats.reduce((s, c) => s + c.hold, 0),
+      value: activeClassStats.reduce((s, c) => s + c.hold, 0),
       color: CHART_COLORS.status.Hold,
     },
     {
       name: "Dropped",
-      value: overview.classwiseStats.reduce((s, c) => s + c.dropped, 0),
+      value: activeClassStats.reduce((s, c) => s + c.dropped, 0),
       color: CHART_COLORS.status.Dropped,
     },
   ].filter((d) => d.value > 0);
 
-  const totalNotPlaced = overview.classwiseStats.reduce(
+  const totalNotPlaced = activeClassStats.reduce(
     (s, c) => s + c.notPlaced,
     0
   );
-  const totalHold = overview.classwiseStats.reduce((s, c) => s + c.hold, 0);
-  const totalDropped = overview.classwiseStats.reduce(
+  const totalHold = activeClassStats.reduce((s, c) => s + c.hold, 0);
+  const totalDropped = activeClassStats.reduce(
     (s, c) => s + c.dropped,
     0
   );
 
   // Totals for expanded table
-  const totals = overview.classwiseStats.reduce(
+  const totals = activeClassStats.reduce(
     (acc, cs) => ({
       total: acc.total + cs.total,
       male: acc.male + cs.male,
@@ -355,7 +419,7 @@ export default function OverviewPage() {
         </StaggerContainer>
 
         {/* Expanded Class-wise Summary Table */}
-        <ChartCard title="Class-Wise Summary">
+        <ChartCard title={groupByClass ? "Class Summary" : "Class-Wise Summary"}>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -443,9 +507,8 @@ export default function OverviewPage() {
                       <Cell
                         key={entry.name}
                         fill={
-                          CHART_COLORS.class[
-                            entry.name as keyof typeof CHART_COLORS.class
-                          ] ?? CHART_COLORS.sequential[0]
+                          classColors[entry.name as keyof typeof classColors] ??
+                          CHART_COLORS.sequential[0]
                         }
                       />
                     ))}
