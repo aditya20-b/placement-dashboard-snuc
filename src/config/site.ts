@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "SNU Chennai Placement Dashboard",
   description:
     "Placement tracking and analytics dashboard for Shiv Nadar University Chennai",
-  batch: "2021-25",
+  batch: "2022-26",
 } as const;
 
 export interface NavItem {

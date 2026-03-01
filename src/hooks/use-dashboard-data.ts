@@ -7,6 +7,7 @@ import type {
   CompanyStats,
   TopOffer,
   MultipleOfferStudent,
+  TimelineEntry,
   StudentRecord,
   AnonymizedStudentRecord,
   ClassSection,
@@ -19,6 +20,7 @@ export interface DashboardData {
   topOffers: TopOffer[];
   multipleOffers: MultipleOfferStudent[];
   companyClassBreakdown: Record<string, Record<ClassSection | "total", number>>;
+  timeline: TimelineEntry[];
   students: StudentRecord[] | AnonymizedStudentRecord[];
   timestamp: string;
 }

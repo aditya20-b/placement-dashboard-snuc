@@ -15,6 +15,7 @@ export interface ClassStats {
   placementPercent: number;
   malePlacedPercent: number;
   femalePlacedPercent: number;
+  offers: number;
 }
 
 export interface OverviewStats {
@@ -24,6 +25,8 @@ export interface OverviewStats {
   placementExempt: number;
   totalPlaced: number;
   totalOffers: number;
+  uniqueCompanies: number;
+  internshipOnly: number;
   placementPercent: number;
   classwiseStats: ClassStats[];
 }
@@ -59,4 +62,11 @@ export interface MultipleOfferStudent {
   rollNo: string;
   name: string;
   companies: string[];
+}
+
+export interface TimelineEntry {
+  date: string;
+  company: string;
+  count: number;
+  ctc: number;
 }

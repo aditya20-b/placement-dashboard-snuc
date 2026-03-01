@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import { DashboardSkeleton } from "@/components/dashboard/loading-skeleton";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -8,6 +9,8 @@ import { PageTransition, StaggerContainer, StaggerItem } from "@/components/dash
 import { DataFreshness } from "@/components/dashboard/data-freshness";
 import { formatINRCompact } from "@/lib/format";
 import { CHART_COLORS } from "@/lib/constants";
+import { useTableSort } from "@/hooks/use-table-sort";
+import { SortableHeader } from "@/components/dashboard/sortable-header";
 import {
   BarChart,
   Bar,
@@ -33,8 +36,33 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+type PercentileRow = { percent: number; average: number };
+type TopOfferRow = { rank: number; studentName: string; company: string; ctc: number; offerType: string };
+
 export default function CTCPage() {
   const { data, isLoading, error } = useDashboardData();
+
+  // Hooks must be called before any early returns
+  const percentileRows = useMemo<PercentileRow[]>(() => {
+    if (!data) return [];
+    return data.ctc.topPercentiles.map((row) => ({
+      percent: row.percent,
+      average: Math.round(row.average),
+    }));
+  }, [data]);
+  const percentileSort = useTableSort<PercentileRow, "percent" | "average">(percentileRows);
+
+  const topOfferRows = useMemo<TopOfferRow[]>(() => {
+    if (!data) return [];
+    return data.topOffers.map((o, i) => ({
+      rank: i + 1,
+      studentName: o.studentName,
+      company: o.company,
+      ctc: o.ctc,
+      offerType: o.offerType,
+    }));
+  }, [data]);
+  const topOfferSort = useTableSort<TopOfferRow, "studentName" | "company" | "ctc" | "offerType">(topOfferRows);
 
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data) {
@@ -53,14 +81,17 @@ export default function CTCPage() {
     value: p.value,
   }));
 
-  // CTC vs date scatter data
-  const scatterData = data.companies.flatMap((c) =>
-    c.offerDates.map((date, i) => ({
-      date,
-      ctc: c.ctcValues[i] ?? 0,
-      company: c.company,
-    }))
-  ).filter((d) => d.date && d.ctc > 0);
+  // CTC vs date scatter data — built from individual offers
+  const scatterData = data.students
+    .flatMap((s) =>
+      s.offers
+        .filter((o) => o.offerType !== "Internship" && o.offerDate && o.ctc > 0)
+        .map((o) => ({
+          date: o.offerDate as string,
+          ctc: o.ctc,
+          company: o.company,
+        }))
+    );
 
   // Blue gradient for histogram
   const blueGradient = [
@@ -139,16 +170,16 @@ export default function CTCPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Top %</TableHead>
-                <TableHead className="text-right">Average CTC</TableHead>
+                <SortableHeader label="Top %" sortDirection={percentileSort.getSortIndicator("percent")} onSort={() => percentileSort.requestSort("percent")} />
+                <SortableHeader label="Average CTC" sortDirection={percentileSort.getSortIndicator("average")} onSort={() => percentileSort.requestSort("average")} className="text-right" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ctc.topPercentiles.map((row) => (
+              {percentileSort.sortedData.map((row) => (
                 <TableRow key={row.percent}>
                   <TableCell>Top {row.percent}%</TableCell>
                   <TableCell className="text-right font-mono">
-                    {formatINRCompact(Math.round(row.average))}
+                    {formatINRCompact(row.average)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -232,14 +263,14 @@ export default function CTCPage() {
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
-              <TableHead>Student</TableHead>
-              <TableHead>Company</TableHead>
-              <TableHead className="text-right">CTC</TableHead>
-              <TableHead>Type</TableHead>
+              <SortableHeader label="Student" sortDirection={topOfferSort.getSortIndicator("studentName")} onSort={() => topOfferSort.requestSort("studentName")} />
+              <SortableHeader label="Company" sortDirection={topOfferSort.getSortIndicator("company")} onSort={() => topOfferSort.requestSort("company")} />
+              <SortableHeader label="CTC" sortDirection={topOfferSort.getSortIndicator("ctc")} onSort={() => topOfferSort.requestSort("ctc")} className="text-right" />
+              <SortableHeader label="Type" sortDirection={topOfferSort.getSortIndicator("offerType")} onSort={() => topOfferSort.requestSort("offerType")} />
             </TableRow>
           </TableHeader>
           <TableBody>
-            {topOffers.map((offer, i) => (
+            {topOfferSort.sortedData.map((offer, i) => (
               <TableRow key={i}>
                 <TableCell>{i + 1}</TableCell>
                 <TableCell className="font-medium">

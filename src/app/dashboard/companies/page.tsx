@@ -2,9 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
+import { useTableSort } from "@/hooks/use-table-sort";
 import { DashboardSkeleton } from "@/components/dashboard/loading-skeleton";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { ChartCard } from "@/components/dashboard/chart-card";
+import { SortableHeader } from "@/components/dashboard/sortable-header";
 import { formatINRCompact, formatDate } from "@/lib/format";
 import { CHART_COLORS, VALID_CLASS_SECTIONS } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
@@ -28,6 +30,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+type CompanyRow = {
+  company: string;
+  offerCount: number;
+  percentage: number;
+  dates: string;
+  ctcRange: string;
+  ctcValues: number[];
+  offerDates: string[];
+};
+
 export default function CompaniesPage() {
   const { data, isLoading, error } = useDashboardData();
   const [search, setSearch] = useState("");
@@ -39,6 +51,30 @@ export default function CompaniesPage() {
       c.company.toLowerCase().includes(q)
     );
   }, [data, search]);
+
+  const companyRows = useMemo<CompanyRow[]>(
+    () =>
+      filteredCompanies.map((c) => ({
+        company: c.company,
+        offerCount: c.offerCount,
+        percentage: c.percentage,
+        dates:
+          c.offerDates.length > 0
+            ? c.offerDates.map(formatDate).join(", ")
+            : "—",
+        ctcRange:
+          c.ctcValues.length > 0
+            ? c.ctcValues.length === 1
+              ? formatINRCompact(c.ctcValues[0])
+              : `${formatINRCompact(c.ctcValues[c.ctcValues.length - 1])} - ${formatINRCompact(c.ctcValues[0])}`
+            : "—",
+        ctcValues: c.ctcValues,
+        offerDates: c.offerDates,
+      })),
+    [filteredCompanies]
+  );
+
+  const tableSort = useTableSort<CompanyRow, keyof CompanyRow>(companyRows);
 
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data) {
@@ -55,9 +91,8 @@ export default function CompaniesPage() {
   const avgPerCompany =
     totalCompanies > 0 ? (totalOffers / totalCompanies).toFixed(2) : "0";
 
-  // Top 15 companies for stacked bar chart
-  const topCompanies = companies.slice(0, 15);
-  const stackedBarData = topCompanies.map((c) => {
+  // All companies for stacked bar chart
+  const stackedBarData = companies.map((c) => {
     const breakdown = companyClassBreakdown[c.company] ?? {};
     return {
       name: c.company,
@@ -66,6 +101,8 @@ export default function CompaniesPage() {
       ),
     };
   });
+
+  const chartHeight = Math.max(400, companies.length * 30);
 
   return (
     <div className="space-y-6">
@@ -80,34 +117,36 @@ export default function CompaniesPage() {
         />
       </div>
 
-      {/* Company-wise offers stacked bar */}
+      {/* Company-wise offers stacked bar — all companies */}
       <ChartCard
-        title="Company-Wise Offers (Top 15)"
+        title="Company-Wise Offers (All Companies)"
         description="Stacked by class section"
       >
-        <div className="h-96">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={stackedBarData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis
-                type="category"
-                dataKey="name"
-                width={120}
-                tick={{ fontSize: 12 }}
-              />
-              <Tooltip />
-              <Legend />
-              {VALID_CLASS_SECTIONS.map((cs) => (
-                <Bar
-                  key={cs}
-                  dataKey={cs}
-                  stackId="a"
-                  fill={CHART_COLORS.class[cs]}
+        <div className="max-h-[600px] overflow-y-auto">
+          <div style={{ height: `${chartHeight}px` }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stackedBarData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={140}
+                  tick={{ fontSize: 12 }}
                 />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
+                <Tooltip />
+                <Legend />
+                {VALID_CLASS_SECTIONS.map((cs) => (
+                  <Bar
+                    key={cs}
+                    dataKey={cs}
+                    stackId="a"
+                    fill={CHART_COLORS.class[cs]}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </ChartCard>
 
@@ -129,35 +168,27 @@ export default function CompaniesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Company</TableHead>
-                <TableHead className="text-center">Offers</TableHead>
+                <SortableHeader label="Company" sortDirection={tableSort.getSortIndicator("company")} onSort={() => tableSort.requestSort("company")} />
+                <SortableHeader label="Offers" sortDirection={tableSort.getSortIndicator("offerCount")} onSort={() => tableSort.requestSort("offerCount")} className="text-center" />
                 <TableHead>Dates</TableHead>
                 <TableHead className="text-right">CTC Range</TableHead>
-                <TableHead className="text-right">%</TableHead>
+                <SortableHeader label="%" sortDirection={tableSort.getSortIndicator("percentage")} onSort={() => tableSort.requestSort("percentage")} className="text-right" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCompanies.map((c, i) => (
-                <TableRow key={c.company}>
+              {tableSort.sortedData.map((row, i) => (
+                <TableRow key={row.company}>
                   <TableCell>{i + 1}</TableCell>
-                  <TableCell className="font-medium">{c.company}</TableCell>
-                  <TableCell className="text-center">{c.offerCount}</TableCell>
+                  <TableCell className="font-medium">{row.company}</TableCell>
+                  <TableCell className="text-center">{row.offerCount}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {c.offerDates.length > 0
-                      ? c.offerDates.map(formatDate).join(", ")
-                      : "—"}
+                    {row.dates}
                   </TableCell>
                   <TableCell className="text-right font-mono text-sm">
-                    {c.ctcValues.length > 0
-                      ? c.ctcValues.length === 1
-                        ? formatINRCompact(c.ctcValues[0])
-                        : `${formatINRCompact(
-                            c.ctcValues[c.ctcValues.length - 1]
-                          )} - ${formatINRCompact(c.ctcValues[0])}`
-                      : "—"}
+                    {row.ctcRange}
                   </TableCell>
                   <TableCell className="text-right font-mono">
-                    {c.percentage.toFixed(1)}%
+                    {row.percentage.toFixed(1)}%
                   </TableCell>
                 </TableRow>
               ))}

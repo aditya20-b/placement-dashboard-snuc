@@ -67,7 +67,7 @@ export default function ExportPage() {
   const handlePDFExport = async () => {
     setGenerating(true);
     try {
-      const doc = generatePDFReport(
+      const doc = await generatePDFReport(
         {
           overview: data.overview,
           ctc: data.ctc,
@@ -76,7 +76,7 @@ export default function ExportPage() {
         },
         sections
       );
-      doc.save("SNU_Placement_Report_2021-25.pdf");
+      doc.save("SNU_Placement_Report_2022-26.pdf");
       toast.success("PDF report generated successfully!");
     } catch (err) {
       console.error("PDF generation error:", err);
@@ -122,7 +122,7 @@ export default function ExportPage() {
           s.bestOffer ? formatINRCompact(s.bestOffer.ctc) : "—",
         ]),
       },
-      "SNU_Placement_Students_2021-25.csv"
+      "SNU_Placement_Students_2022-26.csv"
     );
     toast.success("CSV exported successfully!");
   };
@@ -132,9 +132,8 @@ export default function ExportPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <Shield className="h-5 w-5 text-warning" />
         <span className="text-sm font-medium text-warning">
-          Admin Access — Placement Cell Staff Only
+          Admin Access 
         </span>
       </div>
 

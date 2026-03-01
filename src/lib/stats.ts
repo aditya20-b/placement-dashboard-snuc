@@ -7,6 +7,7 @@ import type {
   CompanyStats,
   TopOffer,
   MultipleOfferStudent,
+  TimelineEntry,
   ClassSection,
 } from "@/types";
 import { VALID_CLASS_SECTIONS, CTC_BUCKETS } from "./constants";
@@ -20,8 +21,17 @@ export function computeOverviewStats(students: StudentRecord[]): OverviewStats {
   const placementExempt = students.filter(
     (s) => s.choice === "Placement Exempt"
   ).length;
-  const totalPlaced = students.filter((s) => s.status === "Placed").length;
+  const totalPlaced = students.filter(
+    (s) => s.choice === "Placement" && s.status === "Placed"
+  ).length;
   const totalOffers = students.reduce((sum, s) => sum + s.offers.length, 0);
+  const uniqueCompanies = new Set(
+    students.flatMap((s) => s.offers.map((o) => o.company))
+  ).size;
+  const internshipOnly = students.filter(
+    (s) =>
+      s.offers.length > 0 && s.offers.every((o) => o.offerType === "Internship")
+  ).length;
   const placementPercent =
     optedPlacement > 0 ? (totalPlaced / optedPlacement) * 100 : 0;
 
@@ -33,16 +43,18 @@ export function computeOverviewStats(students: StudentRecord[]): OverviewStats {
     const opted = group.filter((s) => s.choice === "Placement").length;
     const hs = group.filter((s) => s.choice === "Higher Studies").length;
     const exempt = group.filter((s) => s.choice === "Placement Exempt").length;
-    const placed = group.filter((s) => s.status === "Placed").length;
-    const notPlaced = group.filter((s) => s.status === "Not Placed").length;
-    const hold = group.filter((s) => s.status === "Hold").length;
-    const dropped = group.filter((s) => s.status === "Dropped").length;
+    const placementGroup = group.filter((s) => s.choice === "Placement");
+    const placed = placementGroup.filter((s) => s.status === "Placed").length;
+    const notPlaced = placementGroup.filter((s) => s.status === "Not Placed").length;
+    const hold = placementGroup.filter((s) => s.status === "Hold").length;
+    const dropped = placementGroup.filter((s) => s.status === "Dropped").length;
+    const offers = group.reduce((sum, s) => sum + s.offers.length, 0);
 
     const malePlaced = group.filter(
-      (s) => s.gender === "Male" && s.status === "Placed"
+      (s) => s.choice === "Placement" && s.gender === "Male" && s.status === "Placed"
     ).length;
     const femalePlaced = group.filter(
-      (s) => s.gender === "Female" && s.status === "Placed"
+      (s) => s.choice === "Placement" && s.gender === "Female" && s.status === "Placed"
     ).length;
     const maleOpted = group.filter(
       (s) => s.gender === "Male" && s.choice === "Placement"
@@ -63,6 +75,7 @@ export function computeOverviewStats(students: StudentRecord[]): OverviewStats {
       notPlaced,
       hold,
       dropped,
+      offers,
       placementPercent: opted > 0 ? (placed / opted) * 100 : 0,
       malePlacedPercent: maleOpted > 0 ? (malePlaced / maleOpted) * 100 : 0,
       femalePlacedPercent:
@@ -77,6 +90,8 @@ export function computeOverviewStats(students: StudentRecord[]): OverviewStats {
     placementExempt,
     totalPlaced,
     totalOffers,
+    uniqueCompanies,
+    internshipOnly,
     placementPercent,
     classwiseStats,
   };
@@ -247,4 +262,32 @@ export function computeCompanyClassBreakdown(
   }
 
   return result as Record<string, Record<ClassSection | "total", number>>;
+}
+
+export function computeTimelineStats(
+  students: StudentRecord[]
+): TimelineEntry[] {
+  const grouped = new Map<string, { count: number; maxCtc: number }>();
+
+  for (const student of students) {
+    for (const offer of student.offers) {
+      if (!offer.offerDate) continue;
+      const key = `${offer.offerDate}|${offer.company}`;
+      const existing = grouped.get(key);
+      if (existing) {
+        existing.count++;
+        existing.maxCtc = Math.max(existing.maxCtc, offer.ctc);
+      } else {
+        grouped.set(key, { count: 1, maxCtc: offer.ctc });
+      }
+    }
+  }
+
+  const entries: TimelineEntry[] = [];
+  for (const [key, val] of grouped) {
+    const [date, company] = key.split("|");
+    entries.push({ date, company, count: val.count, ctc: val.maxCtc });
+  }
+
+  return entries.sort((a, b) => a.date.localeCompare(b.date));
 }

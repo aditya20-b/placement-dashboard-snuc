@@ -8,7 +8,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "SNU Chennai Placement Dashboard",
   description:
-    "Placement tracking and analytics dashboard for Shiv Nadar University Chennai — Batch 2021-25",
+    "Placement tracking and analytics dashboard for Shiv Nadar University Chennai — Batch 2022-26",
+  icons: {
+    icon: "/logo_blue.png",
+  },
 };
 
 export default function RootLayout({

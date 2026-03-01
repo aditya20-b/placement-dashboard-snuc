@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import { DashboardSkeleton } from "@/components/dashboard/loading-skeleton";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -10,8 +11,22 @@ import {
   StaggerItem,
 } from "@/components/dashboard/page-transition";
 import { CHART_COLORS } from "@/lib/constants";
+import { formatINRCompact } from "@/lib/format";
 import { DataFreshness } from "@/components/dashboard/data-freshness";
-import { Users, UserCheck, Briefcase, TrendingUp, Award } from "lucide-react";
+import { useTableSort } from "@/hooks/use-table-sort";
+import { SortableHeader } from "@/components/dashboard/sortable-header";
+import {
+  Users,
+  UserCheck,
+  Briefcase,
+  TrendingUp,
+  Building2,
+  GraduationCap,
+  UserX,
+  Pause,
+  XCircle,
+  Award,
+} from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -24,10 +39,86 @@ import {
   PieChart,
   Pie,
   Cell,
+  LabelList,
 } from "recharts";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+const CLASSWISE_COLORS: Record<string, string> = {
+  Placed: "#16A34A",
+  "Not Placed": "#DC2626",
+  Hold: "#D97706",
+  Dropped: "#6C757D",
+  "Higher Studies": "#7C3AED",
+  "Placement Exempt": "#0891B2",
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function NonZeroLabel(props: any) {
+  const { x, y, width, height, value } = props;
+  if (!value || value === 0) return null;
+  return (
+    <text
+      x={x + width / 2}
+      y={y + height / 2}
+      textAnchor="middle"
+      dominantBaseline="central"
+      fontSize={11}
+      fill="#fff"
+      fontWeight={600}
+    >
+      {value}
+    </text>
+  );
+}
+
+type ClassRow = {
+  classSection: string;
+  total: number;
+  male: number;
+  female: number;
+  opted: number;
+  hs: number;
+  exempt: number;
+  placed: number;
+  notPlaced: number;
+  hold: number;
+  dropped: number;
+  placementPercent: number;
+  malePlacedPercent: number;
+  femalePlacedPercent: number;
+};
 
 export default function OverviewPage() {
   const { data, isLoading, error } = useDashboardData();
+
+  // Hooks must be called before any early returns
+  const classwiseRows = useMemo<ClassRow[]>(() => {
+    if (!data) return [];
+    return data.overview.classwiseStats.map((cs) => ({
+      classSection: cs.classSection,
+      total: cs.total,
+      male: cs.male,
+      female: cs.female,
+      opted: cs.optedPlacement,
+      hs: cs.optedHigherStudies,
+      exempt: cs.placementExempt,
+      placed: cs.placed,
+      notPlaced: cs.notPlaced,
+      hold: cs.hold,
+      dropped: cs.dropped,
+      placementPercent: cs.placementPercent,
+      malePlacedPercent: cs.malePlacedPercent,
+      femalePlacedPercent: cs.femalePlacedPercent,
+    }));
+  }, [data]);
+  const classSort = useTableSort<ClassRow, keyof ClassRow>(classwiseRows);
 
   if (isLoading) return <DashboardSkeleton />;
   if (error || !data) {
@@ -48,11 +139,15 @@ export default function OverviewPage() {
     "Placement %": Number(cs.placementPercent.toFixed(1)),
   }));
 
-  const choiceData = overview.classwiseStats.map((cs) => ({
+  const classwiseOverviewData = overview.classwiseStats.map((cs) => ({
     name: cs.classSection,
-    Placement: cs.optedPlacement,
+    Placed: cs.placed,
+    "Not Placed": cs.notPlaced,
+    Hold: cs.hold,
+    Dropped: cs.dropped,
     "Higher Studies": cs.optedHigherStudies,
     "Placement Exempt": cs.placementExempt,
+    total: cs.total,
   }));
 
   const genderData = overview.classwiseStats.map((cs) => ({
@@ -84,6 +179,62 @@ export default function OverviewPage() {
     },
   ].filter((d) => d.value > 0);
 
+  const totalNotPlaced = overview.classwiseStats.reduce(
+    (s, c) => s + c.notPlaced,
+    0
+  );
+  const totalHold = overview.classwiseStats.reduce((s, c) => s + c.hold, 0);
+  const totalDropped = overview.classwiseStats.reduce(
+    (s, c) => s + c.dropped,
+    0
+  );
+
+  // Totals for expanded table
+  const totals = overview.classwiseStats.reduce(
+    (acc, cs) => ({
+      total: acc.total + cs.total,
+      male: acc.male + cs.male,
+      female: acc.female + cs.female,
+      opted: acc.opted + cs.optedPlacement,
+      hs: acc.hs + cs.optedHigherStudies,
+      exempt: acc.exempt + cs.placementExempt,
+      placed: acc.placed + cs.placed,
+      notPlaced: acc.notPlaced + cs.notPlaced,
+      hold: acc.hold + cs.hold,
+      dropped: acc.dropped + cs.dropped,
+      offers: acc.offers + cs.offers,
+    }),
+    {
+      total: 0,
+      male: 0,
+      female: 0,
+      opted: 0,
+      hs: 0,
+      exempt: 0,
+      placed: 0,
+      notPlaced: 0,
+      hold: 0,
+      dropped: 0,
+      offers: 0,
+    }
+  );
+  const totalPlacementPct =
+    totals.opted > 0 ? ((totals.placed / totals.opted) * 100).toFixed(1) : "0.0";
+
+  // Timeline data
+  const timelineData = data.timeline ?? [];
+  const timelineChartData = timelineData.map((entry, i) => ({
+    label: `${entry.company}`,
+    date: new Date(entry.date).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+    }),
+    count: entry.count,
+    company: entry.company,
+    ctc: entry.ctc,
+    fill: CHART_COLORS.sequential[i % CHART_COLORS.sequential.length],
+  }));
+
   return (
     <PageTransition>
       <div className="space-y-6">
@@ -95,7 +246,7 @@ export default function OverviewPage() {
           <DataFreshness timestamp={data.timestamp} />
         </div>
 
-        {/* Hero stat cards */}
+        {/* Row 1 — Student Distribution */}
         <StaggerContainer>
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
             <StaggerItem>
@@ -116,12 +267,34 @@ export default function OverviewPage() {
             </StaggerItem>
             <StaggerItem>
               <StatCard
-                title="Total Placed"
-                value={overview.totalPlaced}
-                icon={UserCheck}
-                iconColor="text-success"
+                title="Higher Studies"
+                value={overview.optedHigherStudies}
+                icon={GraduationCap}
+                iconColor="text-purple-500"
               />
             </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                title="Placement Exempt"
+                value={overview.placementExempt}
+                icon={UserX}
+                iconColor="text-gray-500"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                title="Companies"
+                value={overview.uniqueCompanies}
+                icon={Building2}
+                iconColor="text-blue-400"
+              />
+            </StaggerItem>
+          </div>
+        </StaggerContainer>
+
+        {/* Row 2 — Placement Pipeline */}
+        <StaggerContainer>
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
             <StaggerItem>
               <StatCard
                 title="Placement Rate"
@@ -134,14 +307,120 @@ export default function OverviewPage() {
             </StaggerItem>
             <StaggerItem>
               <StatCard
-                title="Total Offers"
-                value={overview.totalOffers}
+                title="Placed"
+                value={overview.totalPlaced}
+                icon={UserCheck}
+                iconColor="text-success"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                title="Not Placed"
+                value={totalNotPlaced}
+                icon={UserX}
+                iconColor="text-error"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                title="Hold"
+                value={totalHold}
+                icon={Pause}
+                iconColor="text-warning"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                title="Dropped"
+                value={totalDropped}
+                icon={XCircle}
+                iconColor="text-gray-400"
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                title="Internship Only"
+                value={overview.internshipOnly}
                 icon={Award}
-                iconColor="text-blue-400"
+                iconColor="text-blue-300"
               />
             </StaggerItem>
           </div>
         </StaggerContainer>
+
+        {/* Expanded Class-wise Summary Table */}
+        <ChartCard title="Class-Wise Summary">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <SortableHeader label="Class" sortDirection={classSort.getSortIndicator("classSection")} onSort={() => classSort.requestSort("classSection")} />
+                  <SortableHeader label="Total" sortDirection={classSort.getSortIndicator("total")} onSort={() => classSort.requestSort("total")} className="text-right" />
+                  <SortableHeader label="Male" sortDirection={classSort.getSortIndicator("male")} onSort={() => classSort.requestSort("male")} className="text-right" />
+                  <SortableHeader label="Female" sortDirection={classSort.getSortIndicator("female")} onSort={() => classSort.requestSort("female")} className="text-right" />
+                  <SortableHeader label="Opted" sortDirection={classSort.getSortIndicator("opted")} onSort={() => classSort.requestSort("opted")} className="text-right" />
+                  <SortableHeader label="Higher Studies" sortDirection={classSort.getSortIndicator("hs")} onSort={() => classSort.requestSort("hs")} className="text-right" />
+                  <SortableHeader label="Exempt" sortDirection={classSort.getSortIndicator("exempt")} onSort={() => classSort.requestSort("exempt")} className="text-right" />
+                  <SortableHeader label="Placed" sortDirection={classSort.getSortIndicator("placed")} onSort={() => classSort.requestSort("placed")} className="text-right" />
+                  <SortableHeader label="Not Placed" sortDirection={classSort.getSortIndicator("notPlaced")} onSort={() => classSort.requestSort("notPlaced")} className="text-right" />
+                  <SortableHeader label="Hold" sortDirection={classSort.getSortIndicator("hold")} onSort={() => classSort.requestSort("hold")} className="text-right" />
+                  <SortableHeader label="Dropped" sortDirection={classSort.getSortIndicator("dropped")} onSort={() => classSort.requestSort("dropped")} className="text-right" />
+                  <SortableHeader label="Placement %" sortDirection={classSort.getSortIndicator("placementPercent")} onSort={() => classSort.requestSort("placementPercent")} className="text-right" />
+                  <SortableHeader label="Male %" sortDirection={classSort.getSortIndicator("malePlacedPercent")} onSort={() => classSort.requestSort("malePlacedPercent")} className="text-right" />
+                  <SortableHeader label="Female %" sortDirection={classSort.getSortIndicator("femalePlacedPercent")} onSort={() => classSort.requestSort("femalePlacedPercent")} className="text-right" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {classSort.sortedData.map((cs) => (
+                  <TableRow key={cs.classSection}>
+                    <TableCell className="font-medium whitespace-nowrap">
+                      {cs.classSection}
+                    </TableCell>
+                    <TableCell className="text-right">{cs.total}</TableCell>
+                    <TableCell className="text-right">{cs.male}</TableCell>
+                    <TableCell className="text-right">{cs.female}</TableCell>
+                    <TableCell className="text-right">{cs.opted}</TableCell>
+                    <TableCell className="text-right">{cs.hs}</TableCell>
+                    <TableCell className="text-right">{cs.exempt}</TableCell>
+                    <TableCell className="text-right">{cs.placed}</TableCell>
+                    <TableCell className="text-right">{cs.notPlaced}</TableCell>
+                    <TableCell className="text-right">{cs.hold}</TableCell>
+                    <TableCell className="text-right">{cs.dropped}</TableCell>
+                    <TableCell className="text-right font-mono">
+                      {cs.placementPercent.toFixed(1)}%
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {cs.malePlacedPercent.toFixed(1)}%
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {cs.femalePlacedPercent.toFixed(1)}%
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow className="font-semibold border-t-2">
+                  <TableCell>TOTAL</TableCell>
+                  <TableCell className="text-right">{totals.total}</TableCell>
+                  <TableCell className="text-right">{totals.male}</TableCell>
+                  <TableCell className="text-right">{totals.female}</TableCell>
+                  <TableCell className="text-right">{totals.opted}</TableCell>
+                  <TableCell className="text-right">{totals.hs}</TableCell>
+                  <TableCell className="text-right">{totals.exempt}</TableCell>
+                  <TableCell className="text-right">{totals.placed}</TableCell>
+                  <TableCell className="text-right">
+                    {totals.notPlaced}
+                  </TableCell>
+                  <TableCell className="text-right">{totals.hold}</TableCell>
+                  <TableCell className="text-right">{totals.dropped}</TableCell>
+                  <TableCell className="text-right font-mono">
+                    {totalPlacementPct}%
+                  </TableCell>
+                  <TableCell className="text-right font-mono">-</TableCell>
+                  <TableCell className="text-right font-mono">-</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </ChartCard>
 
         {/* Charts row 1 */}
         <div className="grid gap-4 lg:grid-cols-2">
@@ -164,36 +443,41 @@ export default function OverviewPage() {
                         }
                       />
                     ))}
+                    <LabelList
+                      dataKey="Placement %"
+                      position="right"
+                      fontSize={11}
+                      formatter={(value) => `${value}%`}
+                    />
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </ChartCard>
 
-          <ChartCard title="Choice Distribution">
-            <div className="h-64">
+          <ChartCard title="Classwise Overview">
+            <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={choiceData}>
+                <BarChart data={classwiseOverviewData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar
-                    dataKey="Placement"
-                    stackId="a"
-                    fill={CHART_COLORS.sequential[0]}
-                  />
-                  <Bar
-                    dataKey="Higher Studies"
-                    stackId="a"
-                    fill={CHART_COLORS.sequential[1]}
-                  />
-                  <Bar
-                    dataKey="Placement Exempt"
-                    stackId="a"
-                    fill={CHART_COLORS.sequential[4]}
-                  />
+                  {Object.entries(CLASSWISE_COLORS).map(([key, color]) => (
+                    <Bar
+                      key={key}
+                      dataKey={key}
+                      stackId="a"
+                      fill={color}
+                    >
+                      <LabelList
+                        dataKey={key}
+                        position="center"
+                        content={NonZeroLabel}
+                      />
+                    </Bar>
+                  ))}
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -215,18 +499,32 @@ export default function OverviewPage() {
                     dataKey="Male %"
                     fill={CHART_COLORS.sequential[0]}
                     radius={[4, 4, 0, 0]}
-                  />
+                  >
+                    <LabelList
+                      dataKey="Male %"
+                      position="top"
+                      fontSize={11}
+                      formatter={(value) => `${value}%`}
+                    />
+                  </Bar>
                   <Bar
                     dataKey="Female %"
                     fill={CHART_COLORS.sequential[1]}
                     radius={[4, 4, 0, 0]}
-                  />
+                  >
+                    <LabelList
+                      dataKey="Female %"
+                      position="top"
+                      fontSize={11}
+                      formatter={(value) => `${value}%`}
+                    />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </ChartCard>
 
-          <ChartCard title="Status Breakdown">
+          <ChartCard title="Placement Pipeline Status">
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -250,6 +548,56 @@ export default function OverviewPage() {
             </div>
           </ChartCard>
         </div>
+
+        {/* Timeline Chart — full width */}
+        {timelineChartData.length > 0 && (
+          <ChartCard title="Company Visit Timeline">
+            <div className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={timelineChartData}
+                  margin={{ top: 20, right: 20, bottom: 60, left: 20 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    fontSize={11}
+                  />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const d = payload[0].payload;
+                      return (
+                        <div className="rounded-lg border bg-white p-3 text-sm shadow-md">
+                          <p className="font-semibold">{d.company}</p>
+                          <p className="text-muted-foreground">{d.date}</p>
+                          <p>Offers: {d.count}</p>
+                          {d.ctc > 0 && <p>Max CTC: {formatINRCompact(d.ctc)}</p>}
+                        </div>
+                      );
+                    }}
+                  />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                    {timelineChartData.map((entry, i) => (
+                      <Cell key={i} fill={entry.fill} />
+                    ))}
+                    <LabelList
+                      dataKey="company"
+                      position="top"
+                      fontSize={10}
+                      angle={-45}
+                      offset={10}
+                    />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </ChartCard>
+        )}
       </div>
     </PageTransition>
   );

@@ -52,7 +52,16 @@ function parseStatus(raw: string): Status {
   if (val.includes("Hold")) return "Hold";
   if (val.includes("Dropped")) return "Dropped";
   if (val.includes("LOR")) return "LOR Issued";
-  return "Placed";
+  if (val.includes("Placed")) return "Placed";
+  return "Not Placed";
+}
+
+function normalizeCompanyName(raw: string): string {
+  return raw
+    .replace(/\b(PPO|Hackathon|Internship)\b/gi, "")
+    .replace(/\(\s*(off\s*campus|Ninja|Digital)\s*\)/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function parseOfferType(raw: string): OfferType {
@@ -84,7 +93,7 @@ export function joinStudentRecords(
     const rollNo = row.rollNo.trim();
     if (!rollNo) continue;
     const offer: Offer = {
-      company: row.company.trim(),
+      company: normalizeCompanyName(row.company),
       ctc: parseCTC(row.ctcStipend),
       offerType: parseOfferType(row.offerType),
       offerDate: parseOfferDate(row.offerDate),
@@ -102,7 +111,7 @@ export function joinStudentRecords(
     const companies = row.company
       ? row.company
           .split(",")
-          .map((c) => c.trim())
+          .map((c) => normalizeCompanyName(c))
           .filter(Boolean)
       : [];
 

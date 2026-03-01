@@ -9,6 +9,7 @@ import {
   computeTopOffers,
   computeMultipleOfferStudents,
   computeCompanyClassBreakdown,
+  computeTimelineStats,
 } from "@/lib/stats";
 import { getCachedData } from "@/lib/cache";
 import { validateOrigin } from "@/lib/csrf";
@@ -52,6 +53,7 @@ export async function GET(request: Request) {
     const topOffers = computeTopOffers(students);
     const multipleOffers = computeMultipleOfferStudents(students);
     const companyClassBreakdown = computeCompanyClassBreakdown(students);
+    const timeline = computeTimelineStats(students);
 
     // Anonymize top offers for non-admin
     const safeTopOffers = isAdmin
@@ -70,6 +72,7 @@ export async function GET(request: Request) {
         topOffers: safeTopOffers,
         multipleOffers: isAdmin ? multipleOffers : [],
         companyClassBreakdown,
+        timeline,
         students: isAdmin
           ? students
           : students.map(anonymizeRecord),

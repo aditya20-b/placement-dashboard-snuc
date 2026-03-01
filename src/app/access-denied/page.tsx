@@ -50,10 +50,8 @@ export default function AccessDeniedPage() {
           </div>
 
           <div className="rounded-md bg-blue-50 px-4 py-3 text-left text-sm text-blue-700">
-            <p className="font-medium">Need access?</p>
             <p className="mt-1 text-blue-600">
-              Contact the placement cell admin to upgrade your role in the
-              Access sheet.
+              This section is restricted to placement cell administrators.
             </p>
           </div>
 

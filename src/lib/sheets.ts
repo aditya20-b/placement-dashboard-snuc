@@ -10,7 +10,7 @@ function getAuth() {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     },
-    scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 }
 
@@ -34,7 +34,7 @@ export async function fetchAccessList(): Promise<AccessEntry[]> {
   const sheets = getSheets();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    range: "Access!A2:B",
+    range: "Access!A2:B21",
   });
 
   const rows = res.data.values ?? [];
@@ -85,4 +85,29 @@ export async function fetchOfferDetails(): Promise<OfferDetailSheetRow[]> {
     offerType: row[OFFER_COLUMNS.OFFER_TYPE] ?? "",
     offerDate: row[OFFER_COLUMNS.OFFER_DATE] ?? "",
   }));
+}
+
+// ─── Visitor Logging ────────────────────────────────────
+
+/**
+ * Append a visitor's details to the Access sheet log section (row 23+).
+ * Fire-and-forget — errors are logged but never block sign-in.
+ */
+export async function appendVisitorLog(
+  email: string,
+  name: string,
+): Promise<void> {
+  try {
+    const sheets = getSheets();
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: "Access!A23:C",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [[email, name, new Date().toISOString()]],
+      },
+    });
+  } catch (error) {
+    console.error("Failed to log visitor:", error);
+  }
 }

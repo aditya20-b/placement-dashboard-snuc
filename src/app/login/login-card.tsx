@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const ERROR_MESSAGES: Record<string, string> = {
-  AccessDenied: "Your email is not on the access list. Contact an admin to get added.",
   Configuration: "Unable to verify access. Please try again later.",
   OAuthCallback: "Authentication failed. Please try again.",
   default: "An error occurred during sign in.",
@@ -38,7 +37,7 @@ export function LoginCard({
             Placement Dashboard
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Shiv Nadar University Chennai — Batch 2021-25
+            Shiv Nadar University Chennai — Batch 2022-26
           </p>
         </div>
       </CardHeader>

@@ -1,7 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import type { Role } from "@/types/auth";
-import { fetchAccessList } from "./sheets";
+import { fetchAccessList, appendVisitorLog } from "./sheets";
 
 // Cache the access list in memory to avoid hitting Sheets API on every auth check
 let accessCache: { entries: Map<string, Role>; expiresAt: number } | null = null;
@@ -46,12 +46,14 @@ export const authOptions: NextAuthOptions = {
       try {
         const accessList = await getAccessList();
         if (!accessList.has(email)) {
-          return `/login?error=AccessDenied`;
+          // Unknown visitor — log to Access sheet (fire-and-forget)
+          appendVisitorLog(email, user.name ?? "");
         }
         return true;
       } catch (error) {
         console.error("Failed to check access list:", error);
-        return `/login?error=Configuration`;
+        // Still allow sign-in; they'll get viewer role by default
+        return true;
       }
     },
     async jwt({ token, user }) {

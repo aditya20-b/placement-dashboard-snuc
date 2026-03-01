@@ -18,6 +18,7 @@ export type {
   CompanyStats,
   TopOffer,
   MultipleOfferStudent,
+  TimelineEntry,
 } from "./stats";
 export type { Role } from "./auth";
 export type { ApiResponse, ApiError, ApiErrorCode } from "./api";
