@@ -6,7 +6,7 @@ export const siteConfig = {
     "Placement tracking and analytics for Shiv Nadar University Chennai — Batch 2022-26.",
   batch: "2022-26",
   url: "https://placement-dashboard-nu.vercel.app",
-  ogImage: "/og-image.png",
+  ogImage: "/opengraph-image",
 } as const;
 
 export interface NavItem {
