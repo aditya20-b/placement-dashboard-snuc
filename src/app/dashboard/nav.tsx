@@ -71,6 +71,7 @@ export function DashboardNav({
                 alt="SNU Chennai"
                 width={40}
                 height={40}
+                priority
               />
               <div className="hidden items-center gap-1.5 sm:flex">
                 <span className="font-heading text-xl font-semibold text-blue-500">

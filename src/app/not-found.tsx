@@ -14,15 +14,15 @@ export default function NotFound() {
           priority
         />
 
-        <h1 className="mt-8 font-heading text-8xl font-bold text-blue-500">
+        <p className="mt-8 font-heading text-8xl font-bold text-blue-500" aria-hidden="true">
           404
-        </h1>
+        </p>
 
         <div className="mt-4 h-1 w-16 rounded-full bg-gold-400" />
 
-        <h2 className="mt-6 font-heading text-xl font-semibold text-gray-900">
+        <h1 className="mt-6 font-heading text-xl font-semibold text-gray-900">
           Page Not Found
-        </h2>
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
           If you believe this is an error, contact the placement cell.
