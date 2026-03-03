@@ -1,11 +1,16 @@
 import { ImageResponse } from "next/og";
+import { readFileSync } from "fs";
+import { join } from "path";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = "SNU Chennai Placement Dashboard";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default function OGImage() {
+  const logoData = readFileSync(join(process.cwd(), "public/snu-logo.png"));
+  const logoSrc = `data:image/png;base64,${logoData.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -71,56 +76,32 @@ export default function OGImage() {
           }}
         />
 
-        {/* Logo + university name row */}
-        <div
+        {/* Top-left logo */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={logoSrc}
+          alt="Shiv Nadar University Chennai"
+          width={260}
+          height={80}
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 20,
-            marginBottom: 36,
+            position: "absolute",
+            top: 48,
+            left: 64,
+            objectFit: "contain",
+            objectPosition: "left center",
           }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://placement-dashboard-nu.vercel.app/logo_blue.png"
-            alt="SNU Chennai"
-            width={80}
-            height={80}
-            style={{ borderRadius: 12 }}
-          />
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <span
-              style={{
-                fontSize: 22,
-                fontWeight: 600,
-                color: "#495057",
-                letterSpacing: 0.5,
-              }}
-            >
-              Shiv Nadar University Chennai
-            </span>
-            <span
-              style={{
-                fontSize: 16,
-                color: "#ADB5BD",
-                letterSpacing: 0.5,
-              }}
-            >
-              placement-dashboard-nu.vercel.app
-            </span>
-          </div>
-        </div>
+        />
 
         {/* Main heading */}
         <div
           style={{
-            fontSize: 64,
+            fontSize: 72,
             fontWeight: 800,
             color: "#0056A2",
-            letterSpacing: -1,
+            letterSpacing: -1.5,
             textAlign: "center",
             lineHeight: 1.1,
-            marginBottom: 20,
+            marginBottom: 24,
           }}
         >
           Placement Dashboard
@@ -133,14 +114,14 @@ export default function OGImage() {
             height: 4,
             borderRadius: 2,
             background: "#D4A516",
-            marginBottom: 24,
+            marginBottom: 28,
           }}
         />
 
         {/* Subtitle */}
         <div
           style={{
-            fontSize: 26,
+            fontSize: 28,
             color: "#495057",
             textAlign: "center",
             fontWeight: 400,
