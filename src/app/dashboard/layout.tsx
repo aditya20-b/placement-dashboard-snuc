@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getSession } from "@/lib/session";
 import { DashboardNav } from "./nav";
 import { GroupByClassProvider } from "@/contexts/group-by-class-context";
+
+export const metadata: Metadata = {
+  title: "Overview",
+  description:
+    "Live placement statistics for SNU Chennai Batch 2022-26: total students, offer counts, average CTC, company count, and class-wise breakdowns.",
+};
 
 export default async function DashboardLayout({
   children,
