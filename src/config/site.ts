@@ -1,8 +1,12 @@
 export const siteConfig = {
   name: "SNU Chennai Placement Dashboard",
   description:
-    "Placement tracking and analytics dashboard for Shiv Nadar University Chennai",
+    "Placement statistics and analytics dashboard for Shiv Nadar University Chennai — Batch 2022-26. Track CTC, companies, offers, and student placement outcomes.",
+  shortDescription:
+    "Placement tracking and analytics for Shiv Nadar University Chennai — Batch 2022-26.",
   batch: "2022-26",
+  url: "https://placement-dashboard-nu.vercel.app",
+  ogImage: "/og-image.png",
 } as const;
 
 export interface NavItem {
