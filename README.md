@@ -184,8 +184,7 @@ src/
 
 This project is private and intended for use by the Shiv Nadar University Chennai placement cell.
 
----
-
+---
 
 <div align="center">
 
