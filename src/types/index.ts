@@ -1,4 +1,4 @@
-export type { MasterSheetRow, OfferDetailSheetRow } from "./sheets";
+export type { MasterSheetRow, OfferDetailSheetRow, NoOfferCompanyRow } from "./sheets";
 export type {
   Gender,
   Class,

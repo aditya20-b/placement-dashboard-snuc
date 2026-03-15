@@ -9,10 +9,12 @@ import type {
   MultipleOfferStudent,
   TimelineEntry,
   ClassSection,
+  NoOfferCompanyRow,
 } from "@/types";
 import { VALID_CLASS_SECTIONS, CTC_BUCKETS } from "./constants";
+import { parseCTC, parseOfferDate } from "./format";
 
-export function computeOverviewStats(students: StudentRecord[]): OverviewStats {
+export function computeOverviewStats(students: StudentRecord[], noOfferCompanyCount = 0): OverviewStats {
   const totalStudents = students.length;
   const optedPlacement = students.filter((s) => s.choice === "Placement").length;
   const optedHigherStudies = students.filter(
@@ -25,9 +27,10 @@ export function computeOverviewStats(students: StudentRecord[]): OverviewStats {
     (s) => s.choice === "Placement" && s.status === "Placed"
   ).length;
   const totalOffers = students.reduce((sum, s) => sum + s.offers.length, 0);
-  const uniqueCompanies = new Set(
-    students.flatMap((s) => s.offers.map((o) => o.company))
-  ).size;
+  const uniqueCompanies =
+    noOfferCompanyCount > 0
+      ? noOfferCompanyCount
+      : new Set(students.flatMap((s) => s.offers.map((o) => o.company))).size;
   const internshipOnly = students.filter(
     (s) =>
       s.offers.length > 0 && s.offers.every((o) => o.offerType === "Internship")
@@ -178,7 +181,8 @@ export function computeCTCStats(students: StudentRecord[]): CTCStats {
 }
 
 export function computeCompanyStats(
-  students: StudentRecord[]
+  students: StudentRecord[],
+  noOfferCompanies: NoOfferCompanyRow[] = []
 ): CompanyStats[] {
   const companyMap = new Map<
     string,
@@ -202,6 +206,21 @@ export function computeCompanyStats(
     }
   }
 
+  // Append no-offer companies (only if not already present from offers)
+  const noOfferSet = new Set<string>();
+  for (const row of noOfferCompanies) {
+    if (!companyMap.has(row.company)) {
+      const ctc = parseCTC(row.ctcStipend);
+      const date = parseOfferDate(row.visitDate);
+      companyMap.set(row.company, {
+        offers: 0,
+        dates: date ? new Set([date]) : new Set(),
+        ctcs: ctc > 0 ? [ctc] : [],
+      });
+      noOfferSet.add(row.company);
+    }
+  }
+
   return Array.from(companyMap.entries())
     .map(([company, data]) => ({
       company,
@@ -209,6 +228,7 @@ export function computeCompanyStats(
       offerDates: Array.from(data.dates).sort(),
       ctcValues: data.ctcs.sort((a, b) => b - a),
       percentage: totalOffers > 0 ? (data.offers / totalOffers) * 100 : 0,
+      visitedOnly: noOfferSet.has(company),
     }))
     .sort((a, b) => b.offerCount - a.offerCount);
 }

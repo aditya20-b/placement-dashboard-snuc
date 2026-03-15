@@ -27,7 +27,6 @@ import {
   UserX,
   Pause,
   XCircle,
-  Award,
 } from "lucide-react";
 import {
   BarChart,
@@ -55,10 +54,8 @@ import {
 const CLASSWISE_COLORS: Record<string, string> = {
   Placed: "#10B981",
   "Not Placed": "#EF4444",
-  Hold: "#F59E0B",
-  Dropped: "#6B7280",
   "Higher Studies": "#8B5CF6",
-  "Placement Exempt": "#06B6D4",
+  "Opted Out": "#06B6D4",
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -210,10 +207,8 @@ export default function OverviewPage() {
     name: cs.classSection,
     Placed: cs.placed,
     "Not Placed": cs.notPlaced,
-    Hold: cs.hold,
-    Dropped: cs.dropped,
     "Higher Studies": cs.optedHigherStudies,
-    "Placement Exempt": cs.placementExempt,
+    "Opted Out": cs.placementExempt,
     total: cs.total,
   }));
 
@@ -345,7 +340,7 @@ export default function OverviewPage() {
             </StaggerItem>
             <StaggerItem>
               <StatCard
-                title="Placement Exempt"
+                title="Opted Out"
                 value={overview.placementExempt}
                 icon={UserX}
                 iconColor="text-gray-500"
@@ -364,7 +359,7 @@ export default function OverviewPage() {
 
         {/* Row 2 — Placement Pipeline */}
         <StaggerContainer>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-3">
             <StaggerItem>
               <StatCard
                 title="Placement Rate"
@@ -391,30 +386,26 @@ export default function OverviewPage() {
                 iconColor="text-error"
               />
             </StaggerItem>
-            <StaggerItem>
-              <StatCard
-                title="Hold"
-                value={totalHold}
-                icon={Pause}
-                iconColor="text-warning"
-              />
-            </StaggerItem>
-            <StaggerItem>
-              <StatCard
-                title="Dropped"
-                value={totalDropped}
-                icon={XCircle}
-                iconColor="text-gray-400"
-              />
-            </StaggerItem>
-            <StaggerItem>
-              <StatCard
-                title="Internship Only"
-                value={overview.internshipOnly}
-                icon={Award}
-                iconColor="text-blue-300"
-              />
-            </StaggerItem>
+            {totalHold > 0 && (
+              <StaggerItem>
+                <StatCard
+                  title="Hold"
+                  value={totalHold}
+                  icon={Pause}
+                  iconColor="text-warning"
+                />
+              </StaggerItem>
+            )}
+            {totalDropped > 0 && (
+              <StaggerItem>
+                <StatCard
+                  title="Dropped"
+                  value={totalDropped}
+                  icon={XCircle}
+                  iconColor="text-gray-400"
+                />
+              </StaggerItem>
+            )}
           </div>
         </StaggerContainer>
 
@@ -430,11 +421,9 @@ export default function OverviewPage() {
                   <SortableHeader label="Female" sortDirection={classSort.getSortIndicator("female")} onSort={() => classSort.requestSort("female")} className="text-right" />
                   <SortableHeader label="Opted" sortDirection={classSort.getSortIndicator("opted")} onSort={() => classSort.requestSort("opted")} className="text-right" />
                   <SortableHeader label="Higher Studies" sortDirection={classSort.getSortIndicator("hs")} onSort={() => classSort.requestSort("hs")} className="text-right" />
-                  <SortableHeader label="Exempt" sortDirection={classSort.getSortIndicator("exempt")} onSort={() => classSort.requestSort("exempt")} className="text-right" />
+                  <SortableHeader label="Opted Out" sortDirection={classSort.getSortIndicator("exempt")} onSort={() => classSort.requestSort("exempt")} className="text-right" />
                   <SortableHeader label="Placed" sortDirection={classSort.getSortIndicator("placed")} onSort={() => classSort.requestSort("placed")} className="text-right" />
                   <SortableHeader label="Not Placed" sortDirection={classSort.getSortIndicator("notPlaced")} onSort={() => classSort.requestSort("notPlaced")} className="text-right" />
-                  <SortableHeader label="Hold" sortDirection={classSort.getSortIndicator("hold")} onSort={() => classSort.requestSort("hold")} className="text-right" />
-                  <SortableHeader label="Dropped" sortDirection={classSort.getSortIndicator("dropped")} onSort={() => classSort.requestSort("dropped")} className="text-right" />
                   <SortableHeader label="Placement %" sortDirection={classSort.getSortIndicator("placementPercent")} onSort={() => classSort.requestSort("placementPercent")} className="text-right" />
                   <SortableHeader label="Male %" sortDirection={classSort.getSortIndicator("malePlacedPercent")} onSort={() => classSort.requestSort("malePlacedPercent")} className="text-right" />
                   <SortableHeader label="Female %" sortDirection={classSort.getSortIndicator("femalePlacedPercent")} onSort={() => classSort.requestSort("femalePlacedPercent")} className="text-right" />
@@ -454,8 +443,6 @@ export default function OverviewPage() {
                     <TableCell className="text-right">{cs.exempt}</TableCell>
                     <TableCell className="text-right">{cs.placed}</TableCell>
                     <TableCell className="text-right">{cs.notPlaced}</TableCell>
-                    <TableCell className="text-right">{cs.hold}</TableCell>
-                    <TableCell className="text-right">{cs.dropped}</TableCell>
                     <TableCell className="text-right font-mono">
                       {cs.placementPercent.toFixed(1)}%
                     </TableCell>
@@ -476,11 +463,7 @@ export default function OverviewPage() {
                   <TableCell className="text-right">{totals.hs}</TableCell>
                   <TableCell className="text-right">{totals.exempt}</TableCell>
                   <TableCell className="text-right">{totals.placed}</TableCell>
-                  <TableCell className="text-right">
-                    {totals.notPlaced}
-                  </TableCell>
-                  <TableCell className="text-right">{totals.hold}</TableCell>
-                  <TableCell className="text-right">{totals.dropped}</TableCell>
+                  <TableCell className="text-right">{totals.notPlaced}</TableCell>
                   <TableCell className="text-right font-mono">
                     {totalPlacementPct}%
                   </TableCell>

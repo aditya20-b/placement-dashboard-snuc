@@ -20,3 +20,10 @@ export interface OfferDetailSheetRow {
   offerType: string;
   offerDate: string;
 }
+
+/** Raw row from "No_Offers_Company" sheet (3 columns) */
+export interface NoOfferCompanyRow {
+  company: string;
+  visitDate: string;
+  ctcStipend: string;
+}

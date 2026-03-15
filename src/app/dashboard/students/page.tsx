@@ -311,7 +311,7 @@ export default function StudentsPage() {
         <StatCard title="Placed" value={placedCount} icon={UserCheck} iconColor="text-green-500" />
         <StatCard title="Not Placed" value={notPlaced.length} icon={UserX} iconColor="text-red-500" />
         <StatCard title="Higher Studies" value={higherStudies.length} icon={GraduationCap} iconColor="text-purple-500" />
-        <StatCard title="Exempt" value={placementExempt.length} icon={ShieldOff} iconColor="text-gray-500" />
+        <StatCard title="Opted Out Placement" value={placementExempt.length} icon={ShieldOff} iconColor="text-gray-500" />
       </div>
 
       <Tabs defaultValue="all">
@@ -327,7 +327,7 @@ export default function StudentsPage() {
             Higher Studies ({higherStudies.length})
           </TabsTrigger>
           <TabsTrigger value="exempt">
-            Exempt ({placementExempt.length})
+            Opted Out ({placementExempt.length})
           </TabsTrigger>
           <TabsTrigger value="internship">
             Internship Only ({internshipOnly.length})
@@ -581,7 +581,7 @@ export default function StudentsPage() {
         </TabsContent>
 
         <TabsContent value="exempt">
-          <ChartCard title={`Placement Exempt (${placementExempt.length} students)`}>
+          <ChartCard title={`Opted Out Placement (${placementExempt.length} students)`}>
             <Table>
               <TableHeader>
                 <TableRow>

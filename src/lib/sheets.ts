@@ -1,6 +1,6 @@
 import "server-only";
 import { google } from "googleapis";
-import type { MasterSheetRow, OfferDetailSheetRow } from "@/types";
+import type { MasterSheetRow, OfferDetailSheetRow, NoOfferCompanyRow } from "@/types";
 import type { Role } from "@/types/auth";
 import { MASTER_COLUMNS, OFFER_COLUMNS } from "./constants";
 
@@ -85,6 +85,34 @@ export async function fetchOfferDetails(): Promise<OfferDetailSheetRow[]> {
     offerType: row[OFFER_COLUMNS.OFFER_TYPE] ?? "",
     offerDate: row[OFFER_COLUMNS.OFFER_DATE] ?? "",
   }));
+}
+
+export async function fetchNoOfferCompanies(): Promise<NoOfferCompanyRow[]> {
+  const sheets = getSheets();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    range: "No_Offers_Company!B2:D",
+  });
+
+  const rows = res.data.values ?? [];
+  return rows
+    .filter((row) => row[0]?.trim())
+    .map((row) => ({
+      company: row[0]?.trim() ?? "",
+      visitDate: row[1]?.trim() ?? "",
+      ctcStipend: row[2]?.trim() ?? "",
+    }));
+}
+
+export async function fetchTotalCompanyCount(): Promise<number> {
+  const sheets = getSheets();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    range: "Company_Details!B6:B",
+  });
+
+  const rows = res.data.values ?? [];
+  return rows.filter((row) => row[0]?.trim()).length;
 }
 
 // ─── Visitor Logging ────────────────────────────────────

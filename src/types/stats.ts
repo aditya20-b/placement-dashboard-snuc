@@ -49,6 +49,7 @@ export interface CompanyStats {
   offerDates: string[];
   ctcValues: number[];
   percentage: number;
+  visitedOnly?: boolean;
 }
 
 export interface TopOffer {

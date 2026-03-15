@@ -176,7 +176,7 @@ function drawHighlightCards(doc: jsPDF, overview: OverviewStats, y: number): num
     { label: "Total Offers", value: fmt(overview.totalOffers), accent: GOLD },
     { label: "Companies", value: fmt(overview.uniqueCompanies), accent: GOLD },
     { label: "Higher Studies", value: fmt(overview.optedHigherStudies), accent: [124, 58, 237] as [number, number, number] },
-    { label: "Placement Exempt", value: fmt(overview.placementExempt), accent: GRAY },
+    { label: "Opted Out Placement", value: fmt(overview.placementExempt), accent: GRAY },
     { label: "Internship Only", value: fmt(overview.internshipOnly), accent: GRAY },
   ];
 
@@ -689,7 +689,7 @@ export async function generatePDFReport(
 
     // Full table matching the dashboard: all 14 columns
     const classwiseHead = [
-      "Class", "Total", "M", "F", "Opted", "HS", "Exempt",
+      "Class", "Total", "M", "F", "Opted", "HS", "Opted Out",
       "Placed", "Not Pl.", "Hold", "Drop", "Pl. %", "M %", "F %",
     ];
 

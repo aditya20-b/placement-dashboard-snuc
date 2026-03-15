@@ -41,6 +41,7 @@ type CompanyRow = {
   ctcRange: string;
   ctcValues: number[];
   offerDates: string[];
+  visitedOnly: boolean;
 };
 
 export default function CompaniesPage() {
@@ -74,6 +75,7 @@ export default function CompaniesPage() {
             : "—",
         ctcValues: c.ctcValues,
         offerDates: c.offerDates,
+        visitedOnly: c.visitedOnly ?? false,
       })),
     [filteredCompanies]
   );
@@ -100,7 +102,7 @@ export default function CompaniesPage() {
 
   // All companies for stacked bar chart
   // When grouped: merge "AIDS A" + "AIDS B" → "AIDS", "IOT A" + "IOT B" → "IOT"
-  const stackedBarData = companies.map((c) => {
+  const stackedBarData = companies.filter((c) => !c.visitedOnly).map((c) => {
     const breakdown = companyClassBreakdown[c.company] ?? {};
     if (groupByClass) {
       return {
@@ -213,9 +215,18 @@ export default function CompaniesPage() {
             </TableHeader>
             <TableBody>
               {tableSort.sortedData.map((row, i) => (
-                <TableRow key={row.company}>
+                <TableRow key={row.company} className={row.visitedOnly ? "opacity-60" : ""}>
                   <TableCell>{i + 1}</TableCell>
-                  <TableCell className="font-medium">{row.company}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      {row.company}
+                      {row.visitedOnly && (
+                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                          No Hires
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-center">{row.offerCount}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {row.dates}
@@ -224,7 +235,7 @@ export default function CompaniesPage() {
                     {row.ctcRange}
                   </TableCell>
                   <TableCell className="text-right font-mono">
-                    {row.percentage.toFixed(1)}%
+                    {row.visitedOnly ? "—" : `${row.percentage.toFixed(1)}%`}
                   </TableCell>
                 </TableRow>
               ))}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
-import { fetchMasterSheet, fetchOfferDetails } from "@/lib/sheets";
+import { fetchMasterSheet, fetchOfferDetails, fetchTotalCompanyCount, fetchNoOfferCompanies } from "@/lib/sheets";
 import { joinStudentRecords, anonymizeRecord } from "@/lib/data";
 import {
   computeOverviewStats,
@@ -19,20 +19,24 @@ export async function GET() {
     const session = await getSession();
     const isAdmin = session?.user?.role === "admin";
 
-    const { data: students, cached } = await getCachedData(
-      CACHE_KEYS.STUDENT_RECORDS,
-      async () => {
-        const [master, offers] = await Promise.all([
-          fetchMasterSheet(),
-          fetchOfferDetails(),
-        ]);
-        return joinStudentRecords(master, offers);
-      }
-    );
+    const [{ data: students, cached }, totalCompanyCount, noOfferCompanies] = await Promise.all([
+      getCachedData(
+        CACHE_KEYS.STUDENT_RECORDS,
+        async () => {
+          const [master, offers] = await Promise.all([
+            fetchMasterSheet(),
+            fetchOfferDetails(),
+          ]);
+          return joinStudentRecords(master, offers);
+        }
+      ),
+      fetchTotalCompanyCount(),
+      fetchNoOfferCompanies(),
+    ]);
 
-    const overview = computeOverviewStats(students);
+    const overview = computeOverviewStats(students, totalCompanyCount);
     const ctc = computeCTCStats(students);
-    const companies = computeCompanyStats(students);
+    const companies = computeCompanyStats(students, noOfferCompanies);
     const topOffers = computeTopOffers(students);
     const multipleOffers = computeMultipleOfferStudents(students);
     const companyClassBreakdown = computeCompanyClassBreakdown(students);
