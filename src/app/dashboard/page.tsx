@@ -13,7 +13,6 @@ import {
 import { CHART_COLORS } from "@/lib/constants";
 import { useGroupByClass } from "@/contexts/group-by-class-context";
 import type { ClassStats } from "@/types/stats";
-import { formatINRCompact } from "@/lib/format";
 import { DataFreshness } from "@/components/dashboard/data-freshness";
 import { useTableSort } from "@/hooks/use-table-sort";
 import { SortableHeader } from "@/components/dashboard/sortable-header";
@@ -41,12 +40,13 @@ import {
   Pie,
   Cell,
   LabelList,
+  LineChart,
+  Line,
 } from "recharts";
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
@@ -283,19 +283,34 @@ export default function OverviewPage() {
   const totalPlacementPct =
     totals.opted > 0 ? ((totals.placed / totals.opted) * 100).toFixed(1) : "0.0";
 
-  // Timeline data
+  // Timeline — cumulative offers over time
   const timelineData = data.timeline ?? [];
-  const timelineChartData = timelineData.map((entry, i) => ({
-    label: `${entry.company}`,
-    date: new Date(entry.date).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-    }),
-    count: entry.count,
-    company: entry.company,
-    ctc: entry.ctc,
-    fill: CHART_COLORS.sequential[i % CHART_COLORS.sequential.length],
+  const timelineSorted = [...timelineData].sort((a, b) => a.date.localeCompare(b.date));
+  const cumulativeTimeline = (() => {
+    let running = 0;
+    const byDate = new Map<string, number>();
+    for (const e of timelineSorted) {
+      byDate.set(e.date, (byDate.get(e.date) ?? 0) + e.count);
+    }
+    return Array.from(byDate.entries()).map(([date, count]) => {
+      running += count;
+      return {
+        date: new Date(date).toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
+        daily: count,
+        cumulative: running,
+      };
+    });
+  })();
+
+  // Offer type breakdown for donut
+  const offerTypeData = (data.overview.offerTypeBreakdown ?? []).map((d) => ({
+    name: d.offerType,
+    value: d.count,
+    color: CHART_COLORS.offerType[d.offerType as keyof typeof CHART_COLORS.offerType] ?? CHART_COLORS.sequential[0],
   }));
+
+  // Gender placement split
+  const { malePlaced, femalePlaced, maleTotal, femaleTotal } = data.overview.genderPlacementSplit ?? { malePlaced: 0, femalePlaced: 0, maleTotal: 0, femaleTotal: 0 };
 
   return (
     <PageTransition>
@@ -601,54 +616,78 @@ export default function OverviewPage() {
           </ChartCard>
         </div>
 
-        {/* Timeline Chart — full width */}
-        {timelineChartData.length > 0 && (
-          <ChartCard title="Company Visit Timeline">
-            <div className="h-96">
+        {/* Offer Type Breakdown + Gender Split */}
+        <div className="grid gap-4 lg:grid-cols-2">
+          {offerTypeData.length > 0 && (
+            <ChartCard title="Offer Type Breakdown" description="Distribution of offer categories">
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={offerTypeData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={85}
+                      paddingAngle={2}
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                      labelLine={false}
+                    >
+                      {offerTypeData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          )}
+
+          {(malePlaced > 0 || femalePlaced > 0) && (
+            <ChartCard title="Gender Placement Split" description="Placed students by gender">
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={[
+                      { label: "Male", placed: malePlaced, notPlaced: maleTotal - malePlaced },
+                      { label: "Female", placed: femalePlaced, notPlaced: femaleTotal - femalePlaced },
+                    ]}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="label" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="placed" name="Placed" stackId="a" fill={CHART_COLORS.status.Placed} radius={[0,0,0,0]}>
+                      <LabelList dataKey="placed" position="center" fontSize={12} fill="#fff" fontWeight={600} />
+                    </Bar>
+                    <Bar dataKey="notPlaced" name="Not Placed" stackId="a" fill={CHART_COLORS.status["Not Placed"]} radius={[4,4,0,0]}>
+                      <LabelList dataKey="notPlaced" position="center" fontSize={12} fill="#fff" fontWeight={600} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          )}
+        </div>
+
+        {/* Cumulative Offers Timeline */}
+        {cumulativeTimeline.length > 0 && (
+          <ChartCard title="Placement Timeline" description="Cumulative offers over the placement season">
+            <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={timelineChartData}
-                  margin={{ top: 20, right: 20, bottom: 60, left: 20 }}
-                >
+                <LineChart data={cumulativeTimeline} margin={{ top: 10, right: 20, bottom: 60, left: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="date"
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                    fontSize={11}
-                  />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null;
-                      const d = payload[0].payload;
-                      return (
-                        <div className="flex overflow-hidden rounded-lg border border-border/50 bg-white text-sm shadow-lg">
-                          <div className="w-1 bg-gradient-to-b from-blue-500 to-gold-400" />
-                          <div className="p-3">
-                            <p className="font-semibold">{d.company}</p>
-                            <p className="text-muted-foreground">{d.date}</p>
-                            <p>Offers: {d.count}</p>
-                            {d.ctc > 0 && <p>Max CTC: {formatINRCompact(d.ctc)}</p>}
-                          </div>
-                        </div>
-                      );
-                    }}
-                  />
-                  <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                    {timelineChartData.map((entry, i) => (
-                      <Cell key={i} fill={entry.fill} />
-                    ))}
-                    <LabelList
-                      dataKey="company"
-                      position="top"
-                      fontSize={10}
-                      angle={-45}
-                      offset={10}
-                    />
-                  </Bar>
-                </BarChart>
+                  <XAxis dataKey="date" angle={-45} textAnchor="end" height={60} fontSize={11} />
+                  <YAxis yAxisId="left" allowDecimals={false} />
+                  <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
+                  <Tooltip />
+                  <Legend />
+                  <Line yAxisId="left" type="monotone" dataKey="cumulative" name="Total Offers" stroke={CHART_COLORS.sequential[0]} strokeWidth={2} dot={false} />
+                  <Line yAxisId="right" type="monotone" dataKey="daily" name="Daily Offers" stroke={CHART_COLORS.sequential[1]} strokeWidth={1.5} dot={false} strokeDasharray="4 4" />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </ChartCard>

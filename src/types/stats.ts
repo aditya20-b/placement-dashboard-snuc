@@ -29,6 +29,17 @@ export interface OverviewStats {
   internshipOnly: number;
   placementPercent: number;
   classwiseStats: ClassStats[];
+  offerTypeBreakdown: { offerType: string; count: number }[];
+  genderPlacementSplit: { malePlaced: number; femalePlaced: number; maleTotal: number; femaleTotal: number };
+}
+
+export interface BoxPlotStats {
+  min: number;
+  p25: number;
+  median: number;
+  p75: number;
+  max: number;
+  average: number;
 }
 
 export interface CTCStats {
@@ -41,6 +52,9 @@ export interface CTCStats {
   topNAverages: { n: number; average: number }[];
   percentileValues: { n: number; value: number }[];
   bucketDistribution: { bucket: string; count: number }[];
+  boxPlot: BoxPlotStats;
+  ctcByOfferType: { offerType: string; average: number; median: number; count: number }[];
+  ctcByClass: { classSection: string; average: number; median: number; count: number }[];
 }
 
 export interface CompanyStats {

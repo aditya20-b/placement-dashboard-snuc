@@ -4,6 +4,7 @@ import type {
   ClassStats,
   OverviewStats,
   CTCStats,
+  BoxPlotStats,
   CompanyStats,
   TopOffer,
   MultipleOfferStudent,
@@ -11,8 +12,29 @@ import type {
   ClassSection,
   NoOfferCompanyRow,
 } from "@/types";
-import { VALID_CLASS_SECTIONS, CTC_BUCKETS } from "./constants";
+import { VALID_CLASS_SECTIONS, CTC_BUCKETS, VALID_OFFER_TYPES } from "./constants";
 import { parseCTC, parseOfferDate } from "./format";
+
+function computeBoxPlot(sortedDesc: number[]): BoxPlotStats {
+  const asc = [...sortedDesc].reverse();
+  const n = asc.length;
+  if (n === 0) return { min: 0, p25: 0, median: 0, p75: 0, max: 0, average: 0 };
+  const percentile = (p: number) => {
+    const idx = (p / 100) * (n - 1);
+    const lo = Math.floor(idx);
+    const hi = Math.ceil(idx);
+    return asc[lo] + (asc[hi] - asc[lo]) * (idx - lo);
+  };
+  const average = asc.reduce((a, b) => a + b, 0) / n;
+  return {
+    min: asc[0],
+    p25: percentile(25),
+    median: percentile(50),
+    p75: percentile(75),
+    max: asc[n - 1],
+    average,
+  };
+}
 
 export function computeOverviewStats(students: StudentRecord[], noOfferCompanyCount = 0): OverviewStats {
   const totalStudents = students.length;
@@ -86,6 +108,20 @@ export function computeOverviewStats(students: StudentRecord[], noOfferCompanyCo
     };
   });
 
+  const allOffers = students.flatMap((s) => s.offers);
+  const offerTypeBreakdown = VALID_OFFER_TYPES.map((type) => ({
+    offerType: type,
+    count: allOffers.filter((o) => o.offerType === type).length,
+  })).filter((d) => d.count > 0);
+
+  const placedStudents = students.filter(
+    (s) => s.choice === "Placement" && s.status === "Placed"
+  );
+  const malePlaced = placedStudents.filter((s) => s.gender === "Male").length;
+  const femalePlaced = placedStudents.filter((s) => s.gender === "Female").length;
+  const maleTotal = students.filter((s) => s.choice === "Placement" && s.gender === "Male").length;
+  const femaleTotal = students.filter((s) => s.choice === "Placement" && s.gender === "Female").length;
+
   return {
     totalStudents,
     optedPlacement,
@@ -97,6 +133,8 @@ export function computeOverviewStats(students: StudentRecord[], noOfferCompanyCo
     internshipOnly,
     placementPercent,
     classwiseStats,
+    offerTypeBreakdown,
+    genderPlacementSplit: { malePlaced, femalePlaced, maleTotal, femaleTotal },
   };
 }
 
@@ -120,6 +158,9 @@ export function computeCTCStats(students: StudentRecord[]): CTCStats {
       topNAverages: [],
       percentileValues: [],
       bucketDistribution: [],
+      boxPlot: { min: 0, p25: 0, median: 0, p75: 0, max: 0, average: 0 },
+      ctcByOfferType: [],
+      ctcByClass: [],
     };
   }
 
@@ -167,6 +208,38 @@ export function computeCTCStats(students: StudentRecord[]): CTCStats {
     return { bucket: bucket.label, count: bucketCount };
   });
 
+  const boxPlot = computeBoxPlot(ctcValues);
+
+  // CTC by offer type
+  const offerTypeNames = VALID_OFFER_TYPES.filter((t) => t !== "Internship");
+  const ctcByOfferType = offerTypeNames.map((type) => {
+    const vals = allOffers
+      .filter((o) => o.offerType === type && o.ctc > 0)
+      .map((o) => o.ctc)
+      .sort((a, b) => b - a);
+    if (vals.length === 0) return null;
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const med = vals.length % 2 === 0
+      ? (vals[vals.length / 2 - 1] + vals[vals.length / 2]) / 2
+      : vals[Math.floor(vals.length / 2)];
+    return { offerType: type, average: avg, median: med, count: vals.length };
+  }).filter(Boolean) as { offerType: string; average: number; median: number; count: number }[];
+
+  // CTC by class section
+  const ctcByClass = VALID_CLASS_SECTIONS.map((cs) => {
+    const vals = students
+      .filter((s) => s.classSection === cs)
+      .flatMap((s) => s.offers.filter((o) => o.offerType !== "Internship" && o.ctc > 0))
+      .map((o) => o.ctc)
+      .sort((a, b) => b - a);
+    if (vals.length === 0) return null;
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const med = vals.length % 2 === 0
+      ? (vals[vals.length / 2 - 1] + vals[vals.length / 2]) / 2
+      : vals[Math.floor(vals.length / 2)];
+    return { classSection: cs, average: avg, median: med, count: vals.length };
+  }).filter(Boolean) as { classSection: string; average: number; median: number; count: number }[];
+
   return {
     count,
     highest,
@@ -177,6 +250,9 @@ export function computeCTCStats(students: StudentRecord[]): CTCStats {
     topNAverages,
     percentileValues,
     bucketDistribution,
+    boxPlot,
+    ctcByOfferType,
+    ctcByClass,
   };
 }
 

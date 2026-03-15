@@ -15,6 +15,7 @@ export type {
   ClassStats,
   OverviewStats,
   CTCStats,
+  BoxPlotStats,
   CompanyStats,
   TopOffer,
   MultipleOfferStudent,
