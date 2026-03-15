@@ -25,6 +25,7 @@ import {
   LineChart,
   Line,
   ReferenceLine,
+  LabelList,
 } from "recharts";
 import {
   Table,
@@ -163,11 +164,9 @@ export default function CTCPage() {
               <Tooltip />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                 {ctc.bucketDistribution.map((_, i) => (
-                  <Cell
-                    key={i}
-                    fill={histogramColors[i % histogramColors.length]}
-                  />
+                  <Cell key={i} fill={histogramColors[i % histogramColors.length]} />
                 ))}
+                <LabelList dataKey="count" position="top" fontSize={12} fontWeight={600} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -201,13 +200,15 @@ export default function CTCPage() {
         <ChartCard title="CTC Distribution Summary" description="Spread across Min, P25, Median, Average, P75, Max">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={boxPlotData} margin={{ top: 10, right: 20, bottom: 5, left: 10 }}>
+              <LineChart data={boxPlotData} margin={{ top: 24, right: 20, bottom: 5, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="label" />
                 <YAxis tickFormatter={(v) => formatINRCompact(v)} />
                 <Tooltip formatter={(v) => formatINRCompact(Number(v))} />
                 <ReferenceLine y={ctc.boxPlot.average} stroke={CHART_COLORS.sequential[1]} strokeDasharray="5 5" label={{ value: "Avg", position: "insideTopRight", fontSize: 11 }} />
-                <Line type="monotone" dataKey="value" stroke={CHART_COLORS.sequential[0]} strokeWidth={2} dot={{ r: 5, fill: CHART_COLORS.sequential[0] }} />
+                <Line type="monotone" dataKey="value" stroke={CHART_COLORS.sequential[0]} strokeWidth={2} dot={{ r: 5, fill: CHART_COLORS.sequential[0] }}>
+                  <LabelList dataKey="value" position="top" fontSize={11} formatter={(v: number) => formatINRCompact(v)} />
+                </Line>
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -219,14 +220,18 @@ export default function CTCPage() {
         <ChartCard title={`Average CTC by ${groupByClass ? "Class" : "Class Section"}`} description="Excluding internships">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ctcByClassData}>
+              <BarChart data={ctcByClassData} margin={{ top: 24, right: 10, left: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="classSection" />
                 <YAxis tickFormatter={(v) => formatINRCompact(v)} />
                 <Tooltip formatter={(v) => formatINRCompact(Number(v))} />
                 <Legend />
-                <Bar dataKey="average" name="Avg CTC" fill={CHART_COLORS.sequential[0]} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="median" name="Median CTC" fill={CHART_COLORS.sequential[1]} radius={[4, 4, 0, 0]} opacity={0.75} />
+                <Bar dataKey="average" name="Avg CTC" fill={CHART_COLORS.sequential[0]} radius={[4, 4, 0, 0]}>
+                  <LabelList dataKey="average" position="top" fontSize={11} fontWeight={600} formatter={(v: number) => formatINRCompact(v)} />
+                </Bar>
+                <Bar dataKey="median" name="Median CTC" fill={CHART_COLORS.sequential[1]} radius={[4, 4, 0, 0]} opacity={0.75}>
+                  <LabelList dataKey="median" position="top" fontSize={11} formatter={(v: number) => formatINRCompact(v)} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
