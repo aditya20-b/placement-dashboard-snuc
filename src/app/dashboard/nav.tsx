@@ -73,11 +73,11 @@ export function DashboardNav({
                 height={40}
                 priority
               />
-              <div className="hidden items-center gap-1.5 sm:flex">
-                <span className="font-heading text-xl font-semibold text-blue-500">
+              <div className="flex items-center gap-1.5">
+                <span className="font-heading text-base sm:text-xl font-semibold text-blue-500">
                   Placement Dashboard
                 </span>
-                <span className="ml-2 text-xs text-muted-foreground">
+                <span className="ml-1 text-xs text-muted-foreground hidden sm:inline">
                   Batch 2022-26
                 </span>
               </div>

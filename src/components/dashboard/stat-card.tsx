@@ -91,13 +91,13 @@ export function StatCard({
         )}
       >
         <div className="h-0.5 bg-gradient-to-r from-blue-500 to-gold-400" />
-        <CardContent className="pt-5">
+        <CardContent className="pt-3 sm:pt-5">
           <div className="flex items-start justify-between">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-muted-foreground truncate">
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
                 {title}
               </p>
-              <p className="mt-1 font-mono text-3xl font-semibold tracking-tight">
+              <p className="mt-1 font-mono text-2xl sm:text-3xl font-semibold tracking-tight">
                 {prefix}
                 {format ? format(animated) : animated.toLocaleString("en-IN")}
                 {suffix}
@@ -110,7 +110,7 @@ export function StatCard({
             </div>
             {Icon && (
               <div className={cn(
-                "rounded-lg p-2",
+                "rounded-lg p-2 hidden sm:block",
                 iconColor === "text-blue-500" && "bg-blue-50",
                 iconColor === "text-blue-400" && "bg-blue-50",
                 iconColor === "text-blue-300" && "bg-blue-50",
