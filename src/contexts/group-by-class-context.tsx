@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
 interface GroupByClassContextValue {
@@ -14,13 +14,10 @@ const GroupByClassContext = createContext<GroupByClassContextValue>({
 });
 
 export function GroupByClassProvider({ children }: { children: ReactNode }) {
-  const [groupByClass, setGroupByClass] = useState(true);
-
-  // Persist preference in localStorage (default: true)
-  useEffect(() => {
-    const stored = localStorage.getItem("groupByClass");
-    if (stored === "false") setGroupByClass(false);
-  }, []);
+  const [groupByClass, setGroupByClass] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("groupByClass") !== "false";
+  });
 
   const toggleGroupByClass = () => {
     setGroupByClass((prev) => {
