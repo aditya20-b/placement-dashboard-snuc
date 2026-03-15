@@ -137,9 +137,9 @@ export default function CompaniesPage() {
     <PageTransition>
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="font-heading text-3xl font-semibold text-gray-900">
+          <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-gray-900">
             Companies
           </h1>
           <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-blue-500 to-gold-400" />
@@ -211,41 +211,45 @@ export default function CompaniesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>#</TableHead>
+                <TableHead className="hidden sm:table-cell">#</TableHead>
                 <SortableHeader label="Company" sortDirection={tableSort.getSortIndicator("company")} onSort={() => tableSort.requestSort("company")} />
                 <SortableHeader label="Offers" sortDirection={tableSort.getSortIndicator("offerCount")} onSort={() => tableSort.requestSort("offerCount")} className="text-center" />
-                <TableHead>Dates</TableHead>
-                <TableHead className="text-right">CTC Range</TableHead>
-                <SortableHeader label="%" sortDirection={tableSort.getSortIndicator("percentage")} onSort={() => tableSort.requestSort("percentage")} className="text-right" />
+                <TableHead className="hidden sm:table-cell">Dates</TableHead>
+                <TableHead className="text-right hidden sm:table-cell">CTC Range</TableHead>
+                <TableHead className="text-right sm:hidden">CTC</TableHead>
+                <SortableHeader label="%" sortDirection={tableSort.getSortIndicator("percentage")} onSort={() => tableSort.requestSort("percentage")} className="text-right hidden sm:table-cell" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {tableSort.sortedData.map((row, i) => (
                 <TableRow key={row.company} className={row.visitedOnly ? "opacity-60" : ""}>
-                  <TableCell>{i + 1}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{i + 1}</TableCell>
                   <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      {row.company}
+                    <div className="flex items-center flex-wrap gap-1">
+                      <span className="truncate max-w-35 sm:max-w-none">{row.company}</span>
                       {row.visitedOnly && (
-                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 shrink-0">
                           No Hires
                         </span>
                       )}
                       {row.offCampus && (
-                        <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-600 border border-purple-200">
+                        <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-600 border border-purple-200 shrink-0">
                           Off-Campus
                         </span>
                       )}
                     </div>
                   </TableCell>
                   <TableCell className="text-center">{row.offerCount}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="text-sm text-muted-foreground hidden sm:table-cell">
                     {row.dates}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-sm">
+                  <TableCell className="text-right font-mono text-sm hidden sm:table-cell">
                     {row.ctcRange}
                   </TableCell>
-                  <TableCell className="text-right font-mono">
+                  <TableCell className="text-right font-mono text-xs sm:hidden">
+                    {row.ctcValues.length > 0 ? formatINRCompact(row.ctcValues[0]) : "—"}
+                  </TableCell>
+                  <TableCell className="text-right font-mono hidden sm:table-cell">
                     {row.visitedOnly ? "—" : `${row.percentage.toFixed(1)}%`}
                   </TableCell>
                 </TableRow>

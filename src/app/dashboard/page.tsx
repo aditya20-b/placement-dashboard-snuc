@@ -316,9 +316,9 @@ export default function OverviewPage() {
     <PageTransition>
       <div className="space-y-6">
         {/* Header with freshness indicator */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div>
-            <h1 className="font-heading text-3xl font-semibold text-gray-900">
+            <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-gray-900">
               Overview
             </h1>
             <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-blue-500 to-gold-400" />
@@ -328,7 +328,7 @@ export default function OverviewPage() {
 
         {/* Row 1 — Student Distribution */}
         <StaggerContainer>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
             <StaggerItem>
               <StatCard
                 title="Total Students"
@@ -374,7 +374,7 @@ export default function OverviewPage() {
 
         {/* Row 2 — Placement Pipeline */}
         <StaggerContainer>
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-3">
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-3">
             <StaggerItem>
               <StatCard
                 title="Placement Rate"
@@ -432,16 +432,16 @@ export default function OverviewPage() {
                 <TableRow>
                   <SortableHeader label="Class" sortDirection={classSort.getSortIndicator("classSection")} onSort={() => classSort.requestSort("classSection")} />
                   <SortableHeader label="Total" sortDirection={classSort.getSortIndicator("total")} onSort={() => classSort.requestSort("total")} className="text-right" />
-                  <SortableHeader label="Male" sortDirection={classSort.getSortIndicator("male")} onSort={() => classSort.requestSort("male")} className="text-right" />
-                  <SortableHeader label="Female" sortDirection={classSort.getSortIndicator("female")} onSort={() => classSort.requestSort("female")} className="text-right" />
+                  <SortableHeader label="Male" sortDirection={classSort.getSortIndicator("male")} onSort={() => classSort.requestSort("male")} className="text-right hidden sm:table-cell" />
+                  <SortableHeader label="Female" sortDirection={classSort.getSortIndicator("female")} onSort={() => classSort.requestSort("female")} className="text-right hidden sm:table-cell" />
                   <SortableHeader label="Opted" sortDirection={classSort.getSortIndicator("opted")} onSort={() => classSort.requestSort("opted")} className="text-right" />
-                  <SortableHeader label="Higher Studies" sortDirection={classSort.getSortIndicator("hs")} onSort={() => classSort.requestSort("hs")} className="text-right" />
-                  <SortableHeader label="Opted Out" sortDirection={classSort.getSortIndicator("exempt")} onSort={() => classSort.requestSort("exempt")} className="text-right" />
+                  <SortableHeader label="Higher Studies" sortDirection={classSort.getSortIndicator("hs")} onSort={() => classSort.requestSort("hs")} className="text-right hidden md:table-cell" />
+                  <SortableHeader label="Opted Out" sortDirection={classSort.getSortIndicator("exempt")} onSort={() => classSort.requestSort("exempt")} className="text-right hidden md:table-cell" />
                   <SortableHeader label="Placed" sortDirection={classSort.getSortIndicator("placed")} onSort={() => classSort.requestSort("placed")} className="text-right" />
-                  <SortableHeader label="Not Placed" sortDirection={classSort.getSortIndicator("notPlaced")} onSort={() => classSort.requestSort("notPlaced")} className="text-right" />
+                  <SortableHeader label="Not Placed" sortDirection={classSort.getSortIndicator("notPlaced")} onSort={() => classSort.requestSort("notPlaced")} className="text-right hidden sm:table-cell" />
                   <SortableHeader label="Placement %" sortDirection={classSort.getSortIndicator("placementPercent")} onSort={() => classSort.requestSort("placementPercent")} className="text-right" />
-                  <SortableHeader label="Male %" sortDirection={classSort.getSortIndicator("malePlacedPercent")} onSort={() => classSort.requestSort("malePlacedPercent")} className="text-right" />
-                  <SortableHeader label="Female %" sortDirection={classSort.getSortIndicator("femalePlacedPercent")} onSort={() => classSort.requestSort("femalePlacedPercent")} className="text-right" />
+                  <SortableHeader label="Male %" sortDirection={classSort.getSortIndicator("malePlacedPercent")} onSort={() => classSort.requestSort("malePlacedPercent")} className="text-right hidden lg:table-cell" />
+                  <SortableHeader label="Female %" sortDirection={classSort.getSortIndicator("femalePlacedPercent")} onSort={() => classSort.requestSort("femalePlacedPercent")} className="text-right hidden lg:table-cell" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -451,20 +451,20 @@ export default function OverviewPage() {
                       {cs.classSection}
                     </TableCell>
                     <TableCell className="text-right">{cs.total}</TableCell>
-                    <TableCell className="text-right">{cs.male}</TableCell>
-                    <TableCell className="text-right">{cs.female}</TableCell>
+                    <TableCell className="text-right hidden sm:table-cell">{cs.male}</TableCell>
+                    <TableCell className="text-right hidden sm:table-cell">{cs.female}</TableCell>
                     <TableCell className="text-right">{cs.opted}</TableCell>
-                    <TableCell className="text-right">{cs.hs}</TableCell>
-                    <TableCell className="text-right">{cs.exempt}</TableCell>
+                    <TableCell className="text-right hidden md:table-cell">{cs.hs}</TableCell>
+                    <TableCell className="text-right hidden md:table-cell">{cs.exempt}</TableCell>
                     <TableCell className="text-right">{cs.placed}</TableCell>
-                    <TableCell className="text-right">{cs.notPlaced}</TableCell>
+                    <TableCell className="text-right hidden sm:table-cell">{cs.notPlaced}</TableCell>
                     <TableCell className="text-right font-mono">
                       {cs.placementPercent.toFixed(1)}%
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell className="text-right font-mono hidden lg:table-cell">
                       {cs.malePlacedPercent.toFixed(1)}%
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell className="text-right font-mono hidden lg:table-cell">
                       {cs.femalePlacedPercent.toFixed(1)}%
                     </TableCell>
                   </TableRow>
@@ -472,18 +472,18 @@ export default function OverviewPage() {
                 <TableRow className="font-semibold border-t-2">
                   <TableCell>TOTAL</TableCell>
                   <TableCell className="text-right">{totals.total}</TableCell>
-                  <TableCell className="text-right">{totals.male}</TableCell>
-                  <TableCell className="text-right">{totals.female}</TableCell>
+                  <TableCell className="text-right hidden sm:table-cell">{totals.male}</TableCell>
+                  <TableCell className="text-right hidden sm:table-cell">{totals.female}</TableCell>
                   <TableCell className="text-right">{totals.opted}</TableCell>
-                  <TableCell className="text-right">{totals.hs}</TableCell>
-                  <TableCell className="text-right">{totals.exempt}</TableCell>
+                  <TableCell className="text-right hidden md:table-cell">{totals.hs}</TableCell>
+                  <TableCell className="text-right hidden md:table-cell">{totals.exempt}</TableCell>
                   <TableCell className="text-right">{totals.placed}</TableCell>
-                  <TableCell className="text-right">{totals.notPlaced}</TableCell>
+                  <TableCell className="text-right hidden sm:table-cell">{totals.notPlaced}</TableCell>
                   <TableCell className="text-right font-mono">
                     {totalPlacementPct}%
                   </TableCell>
-                  <TableCell className="text-right font-mono">-</TableCell>
-                  <TableCell className="text-right font-mono">-</TableCell>
+                  <TableCell className="text-right font-mono hidden lg:table-cell">-</TableCell>
+                  <TableCell className="text-right font-mono hidden lg:table-cell">-</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -491,7 +491,7 @@ export default function OverviewPage() {
         </ChartCard>
 
         {/* Charts row 1 */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           <ChartCard title="Class-Wise Placement %">
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -549,7 +549,7 @@ export default function OverviewPage() {
         </div>
 
         {/* Charts row 2 */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           <ChartCard title="Gender-Wise Placed %">
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -614,7 +614,7 @@ export default function OverviewPage() {
         </div>
 
         {/* Offer Type Breakdown + Gender Split */}
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
           {offerTypeData.length > 0 && (
             <ChartCard title="Offer Type Breakdown" description="Distribution of offer categories">
               <div className="h-64">
@@ -672,7 +672,7 @@ export default function OverviewPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={cumulativeTimeline} margin={{ top: 10, right: 20, bottom: 60, left: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" angle={-45} textAnchor="end" height={60} fontSize={11} />
+                  <XAxis dataKey="date" angle={-45} textAnchor="end" height={60} fontSize={10} interval="preserveStartEnd" />
                   <YAxis yAxisId="left" allowDecimals={false} />
                   <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
                   <Tooltip />

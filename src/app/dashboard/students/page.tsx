@@ -291,21 +291,22 @@ export default function StudentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="font-heading text-3xl font-semibold text-gray-900">
+          <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-gray-900">
             Students
           </h1>
           <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-blue-500 to-gold-400" />
         </div>
-        <Badge className="bg-amber-100 text-amber-800 border border-amber-300">
+        <Badge className="bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
           <Sparkles className="h-3 w-3" />
-          Admin Access
+          <span className="hidden sm:inline">Admin Access</span>
+          <span className="sm:hidden">Admin</span>
         </Badge>
       </div>
 
       {/* Summary stat cards */}
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
         <StatCard title="Total Students" value={students.length} icon={Users} iconColor="text-blue-500" />
         <StatCard title="Opted Placement" value={optedPlacement} icon={Briefcase} iconColor="text-gold-500" />
         <StatCard title="Placed" value={placedCount} icon={UserCheck} iconColor="text-green-500" />
@@ -315,29 +316,43 @@ export default function StudentsPage() {
       </div>
 
       <Tabs defaultValue="all">
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="all">All Students ({students.length})</TabsTrigger>
+        <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="all">
+            <span className="hidden sm:inline">All Students</span>
+            <span className="sm:hidden">All</span>
+            &nbsp;({students.length})
+          </TabsTrigger>
           <TabsTrigger value="multiple">
-            Multiple Offers ({multipleOffers.length})
+            <span className="hidden sm:inline">Multiple Offers</span>
+            <span className="sm:hidden">Multi</span>
+            &nbsp;({multipleOffers.length})
           </TabsTrigger>
           <TabsTrigger value="not-placed">
-            Not Placed ({notPlaced.length})
+            <span className="hidden sm:inline">Not Placed</span>
+            <span className="sm:hidden">Unplaced</span>
+            &nbsp;({notPlaced.length})
           </TabsTrigger>
           <TabsTrigger value="higher-studies">
-            Higher Studies ({higherStudies.length})
+            <span className="hidden sm:inline">Higher Studies</span>
+            <span className="sm:hidden">HS</span>
+            &nbsp;({higherStudies.length})
           </TabsTrigger>
           <TabsTrigger value="exempt">
-            Opted Out ({placementExempt.length})
+            <span className="hidden sm:inline">Opted Out</span>
+            <span className="sm:hidden">Exempt</span>
+            &nbsp;({placementExempt.length})
           </TabsTrigger>
           <TabsTrigger value="internship">
-            Internship Only ({internshipOnly.length})
+            <span className="hidden sm:inline">Internship Only</span>
+            <span className="sm:hidden">Intern</span>
+            &nbsp;({internshipOnly.length})
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
           {/* Filters */}
-          <div className="my-4 flex flex-wrap gap-3">
-            <div className="relative flex-1">
+          <div className="my-4 space-y-2">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search by name or roll number..."
@@ -346,45 +361,47 @@ export default function StudentsPage() {
                 className="pl-9"
               />
             </div>
-            <Select value={classFilter} onValueChange={setClassFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Class" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Classes</SelectItem>
-                {VALID_CLASS_SECTIONS.map((cs) => (
-                  <SelectItem key={cs} value={cs}>
-                    {cs}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {VALID_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={choiceFilter} onValueChange={setChoiceFilter}>
-              <SelectTrigger className="w-36">
-                <SelectValue placeholder="Choice" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Choices</SelectItem>
-                {VALID_CHOICES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-wrap gap-2">
+              <Select value={classFilter} onValueChange={setClassFilter}>
+                <SelectTrigger className="w-full sm:w-32">
+                  <SelectValue placeholder="Class" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Classes</SelectItem>
+                  {VALID_CLASS_SECTIONS.map((cs) => (
+                    <SelectItem key={cs} value={cs}>
+                      {cs}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-32">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  {VALID_STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={choiceFilter} onValueChange={setChoiceFilter}>
+                <SelectTrigger className="w-full sm:w-36">
+                  <SelectValue placeholder="Choice" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Choices</SelectItem>
+                  {VALID_CHOICES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Student table */}
@@ -393,13 +410,13 @@ export default function StudentsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-8" />
-                  <SortableHeader label="Roll No" sortDirection={allSort.getSortIndicator("rollNo")} onSort={() => allSort.requestSort("rollNo")} />
+                  <SortableHeader label="Roll No" sortDirection={allSort.getSortIndicator("rollNo")} onSort={() => allSort.requestSort("rollNo")} className="hidden sm:table-cell" />
                   <SortableHeader label="Name" sortDirection={allSort.getSortIndicator("name")} onSort={() => allSort.requestSort("name")} />
                   <SortableHeader label="Class" sortDirection={allSort.getSortIndicator("classSection")} onSort={() => allSort.requestSort("classSection")} />
-                  <SortableHeader label="Gender" sortDirection={allSort.getSortIndicator("gender")} onSort={() => allSort.requestSort("gender")} />
-                  <SortableHeader label="Choice" sortDirection={allSort.getSortIndicator("choice")} onSort={() => allSort.requestSort("choice")} />
+                  <SortableHeader label="Gender" sortDirection={allSort.getSortIndicator("gender")} onSort={() => allSort.requestSort("gender")} className="hidden md:table-cell" />
+                  <SortableHeader label="Choice" sortDirection={allSort.getSortIndicator("choice")} onSort={() => allSort.requestSort("choice")} className="hidden md:table-cell" />
                   <SortableHeader label="Status" sortDirection={allSort.getSortIndicator("status")} onSort={() => allSort.requestSort("status")} />
-                  <SortableHeader label="Offers" sortDirection={allSort.getSortIndicator("offerCount")} onSort={() => allSort.requestSort("offerCount")} className="text-center" />
+                  <SortableHeader label="Offers" sortDirection={allSort.getSortIndicator("offerCount")} onSort={() => allSort.requestSort("offerCount")} className="text-center hidden sm:table-cell" />
                   <SortableHeader label="Best CTC" sortDirection={allSort.getSortIndicator("bestCtc")} onSort={() => allSort.requestSort("bestCtc")} className="text-right" />
                 </TableRow>
               </TableHeader>
@@ -426,15 +443,15 @@ export default function StudentsPage() {
                               <ChevronRight className="h-4 w-4" />
                             ))}
                         </TableCell>
-                        <TableCell className="font-mono text-sm">
+                        <TableCell className="font-mono text-sm hidden sm:table-cell">
                           {student.rollNo}
                         </TableCell>
                         <TableCell className="font-medium">
                           {student.name}
                         </TableCell>
                         <TableCell>{student.classSection}</TableCell>
-                        <TableCell>{student.gender}</TableCell>
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">{student.gender}</TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <Badge variant="outline">{student.choice}</Badge>
                         </TableCell>
                         <TableCell>
@@ -446,7 +463,7 @@ export default function StudentsPage() {
                             <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-center">
+                        <TableCell className="text-center hidden sm:table-cell">
                           {student.offers.length}
                         </TableCell>
                         <TableCell className="text-right font-mono">
@@ -458,7 +475,7 @@ export default function StudentsPage() {
                       {expandedRow === student.rollNo &&
                         student.offers.length > 0 && (
                           <TableRow key={`${student.rollNo}-expanded`}>
-                            <TableCell colSpan={9} className="bg-gray-50 p-4">
+                            <TableCell colSpan={8} className="bg-gray-50 p-4">
                               <div className="space-y-2">
                                 <p className="text-sm font-medium">
                                   Offer Details
@@ -506,9 +523,9 @@ export default function StudentsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <SortableHeader label="Roll No" sortDirection={multiSort.getSortIndicator("rollNo")} onSort={() => multiSort.requestSort("rollNo")} />
+                  <SortableHeader label="Roll No" sortDirection={multiSort.getSortIndicator("rollNo")} onSort={() => multiSort.requestSort("rollNo")} className="hidden sm:table-cell" />
                   <SortableHeader label="Name" sortDirection={multiSort.getSortIndicator("name")} onSort={() => multiSort.requestSort("name")} />
-                  <SortableHeader label="Class" sortDirection={multiSort.getSortIndicator("classSection")} onSort={() => multiSort.requestSort("classSection")} />
+                  <SortableHeader label="Class" sortDirection={multiSort.getSortIndicator("classSection")} onSort={() => multiSort.requestSort("classSection")} className="hidden sm:table-cell" />
                   <TableHead>Companies</TableHead>
                   <SortableHeader label="Offers" sortDirection={multiSort.getSortIndicator("offerCount")} onSort={() => multiSort.requestSort("offerCount")} className="text-center" />
                 </TableRow>
@@ -516,10 +533,10 @@ export default function StudentsPage() {
               <TableBody>
                 {multiSort.sortedData.map((row) => (
                   <TableRow key={row.rollNo}>
-                    <TableCell className="font-mono">{row.rollNo}</TableCell>
+                    <TableCell className="font-mono hidden sm:table-cell">{row.rollNo}</TableCell>
                     <TableCell className="font-medium">{row.name}</TableCell>
-                    <TableCell>{row.classSection}</TableCell>
-                    <TableCell>{row.companies}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{row.classSection}</TableCell>
+                    <TableCell className="text-sm max-w-45 truncate">{row.companies}</TableCell>
                     <TableCell className="text-center">
                       {row.offerCount}
                     </TableCell>

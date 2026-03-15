@@ -114,9 +114,9 @@ export default function CTCPage() {
   return (
     <PageTransition>
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="font-heading text-3xl font-semibold text-gray-900">
+          <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-gray-900">
             CTC Analytics
           </h1>
           <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-blue-500 to-gold-400" />
@@ -173,7 +173,7 @@ export default function CTCPage() {
         </div>
       </ChartCard>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
         {/* Top N% Averages Table */}
         <ChartCard title="Top N% Averages">
           <Table>
@@ -240,6 +240,7 @@ export default function CTCPage() {
 
       {/* Top Offers Table */}
       <ChartCard title="Top Offers" description="Highest CTC offers (excluding internships)">
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -262,6 +263,7 @@ export default function CTCPage() {
             ))}
           </TableBody>
         </Table>
+        </div>
       </ChartCard>
     </div>
     </PageTransition>
