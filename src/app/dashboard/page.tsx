@@ -11,6 +11,7 @@ import {
   StaggerItem,
 } from "@/components/dashboard/page-transition";
 import { CHART_COLORS } from "@/lib/constants";
+import { formatINRCompact } from "@/lib/format";
 import { useGroupByClass } from "@/contexts/group-by-class-context";
 import type { ClassStats } from "@/types/stats";
 import { DataFreshness } from "@/components/dashboard/data-freshness";
@@ -296,7 +297,7 @@ export default function OverviewPage() {
       running += count;
       return {
         date: new Date(date).toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
-        daily: count,
+        newOffers: count,
         cumulative: running,
       };
     });
@@ -309,8 +310,7 @@ export default function OverviewPage() {
     color: CHART_COLORS.offerType[d.offerType as keyof typeof CHART_COLORS.offerType] ?? CHART_COLORS.sequential[0],
   }));
 
-  // Gender placement split
-  const { malePlaced, femalePlaced, maleTotal, femaleTotal } = data.overview.genderPlacementSplit ?? { malePlaced: 0, femalePlaced: 0, maleTotal: 0, femaleTotal: 0 };
+
 
   return (
     <PageTransition>
@@ -504,10 +504,7 @@ export default function OverviewPage() {
                     {placementBarData.map((entry) => (
                       <Cell
                         key={entry.name}
-                        fill={
-                          classColors[entry.name as keyof typeof classColors] ??
-                          CHART_COLORS.sequential[0]
-                        }
+                        fill={classColors[entry.name as keyof typeof classColors] ?? CHART_COLORS.sequential[0]}
                       />
                     ))}
                     <LabelList
@@ -645,29 +642,24 @@ export default function OverviewPage() {
             </ChartCard>
           )}
 
-          {(malePlaced > 0 || femalePlaced > 0) && (
-            <ChartCard title="Gender Placement Split" description="Placed students by gender">
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={[
-                      { label: "Male", placed: malePlaced, notPlaced: maleTotal - malePlaced },
-                      { label: "Female", placed: femalePlaced, notPlaced: femaleTotal - femalePlaced },
-                    ]}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="label" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="placed" name="Placed" stackId="a" fill={CHART_COLORS.status.Placed} radius={[0,0,0,0]}>
-                      <LabelList dataKey="placed" position="center" fontSize={12} fill="#fff" fontWeight={600} />
-                    </Bar>
-                    <Bar dataKey="notPlaced" name="Not Placed" stackId="a" fill={CHART_COLORS.status["Not Placed"]} radius={[4,4,0,0]}>
-                      <LabelList dataKey="notPlaced" position="center" fontSize={12} fill="#fff" fontWeight={600} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+          {data.topOffers.length > 0 && (
+            <ChartCard title="Top Offers" description="Highest CTC packages this season">
+              <div className="space-y-2 pt-1">
+                {data.topOffers.slice(0, 6).map((offer, i) => (
+                  <div key={i} className="flex items-center justify-between rounded-md px-3 py-2 hover:bg-muted/50">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-xs font-mono text-muted-foreground w-4 shrink-0">{i + 1}</span>
+                      <span className="text-sm font-medium truncate">{offer.company}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
+                        style={{ background: CHART_COLORS.offerType[offer.offerType as keyof typeof CHART_COLORS.offerType] + "22", color: CHART_COLORS.offerType[offer.offerType as keyof typeof CHART_COLORS.offerType] }}>
+                        {offer.offerType}
+                      </span>
+                      <span className="text-sm font-mono font-semibold">{formatINRCompact(offer.ctc)}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </ChartCard>
           )}
@@ -675,7 +667,7 @@ export default function OverviewPage() {
 
         {/* Cumulative Offers Timeline */}
         {cumulativeTimeline.length > 0 && (
-          <ChartCard title="Placement Timeline" description="Cumulative offers over the placement season">
+          <ChartCard title="Placement Timeline" description="Cumulative offers over the placement season · Off-campus and PPO offers without a recorded date are not shown here">
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={cumulativeTimeline} margin={{ top: 10, right: 20, bottom: 60, left: 10 }}>
@@ -686,7 +678,7 @@ export default function OverviewPage() {
                   <Tooltip />
                   <Legend />
                   <Line yAxisId="left" type="monotone" dataKey="cumulative" name="Total Offers" stroke={CHART_COLORS.sequential[0]} strokeWidth={2} dot={false} />
-                  <Line yAxisId="right" type="monotone" dataKey="daily" name="Daily Offers" stroke={CHART_COLORS.sequential[1]} strokeWidth={1.5} dot={false} strokeDasharray="4 4" />
+                  <Line yAxisId="right" type="monotone" dataKey="newOffers" name="New Offers" stroke={CHART_COLORS.sequential[1]} strokeWidth={1.5} dot={false} strokeDasharray="4 4" />
                 </LineChart>
               </ResponsiveContainer>
             </div>
