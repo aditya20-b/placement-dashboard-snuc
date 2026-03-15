@@ -62,7 +62,7 @@ export const CACHE_TTL = 300; // 5 minutes
 // ─── Off-Campus Companies ────────────────────────────────
 // Companies known to be off-campus but not annotated in the sheet.
 // Names must match exactly after normalization (trimmed, no parenthetical tags).
-export const HARDCODED_OFF_CAMPUS = new Set(["Google", "Qualcomm"]);
+export const HARDCODED_OFF_CAMPUS = new Set(["Google", "Qualcomm", "Schneider Electric", "TCS R&D"]);
 
 // ─── CTC Histogram Buckets ──────────────────────────────
 
