@@ -12,7 +12,7 @@ import type {
   ClassSection,
   NoOfferCompanyRow,
 } from "@/types";
-import { VALID_CLASS_SECTIONS, CTC_BUCKETS, VALID_OFFER_TYPES } from "./constants";
+import { VALID_CLASS_SECTIONS, CTC_BUCKETS, VALID_OFFER_TYPES, HARDCODED_OFF_CAMPUS } from "./constants";
 import { parseCTC, parseOfferDate } from "./format";
 
 function computeBoxPlot(sortedDesc: number[]): BoxPlotStats {
@@ -308,7 +308,7 @@ export function computeCompanyStats(
       ctcValues: data.ctcs.sort((a, b) => b - a),
       percentage: totalOffers > 0 ? (data.offers / totalOffers) * 100 : 0,
       visitedOnly: noOfferSet.has(company),
-      offCampus: data.offers > 0 && data.offCampusCount === data.offers,
+      offCampus: HARDCODED_OFF_CAMPUS.has(company) || (data.offers > 0 && data.offCampusCount === data.offers),
     }))
     .sort((a, b) => b.offerCount - a.offerCount);
 }
