@@ -126,7 +126,7 @@ export default function CTCPage() {
 
       {/* CTC stat cards */}
       <StaggerContainer>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Highest CTC"
           value={ctc.highest}

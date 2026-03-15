@@ -148,7 +148,7 @@ export default function CompaniesPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-3 grid-cols-3">
         <StatCard title="Companies Visited" value={totalCompanies} />
         <StatCard title="Total Offers" value={totalOffers} />
         <StatCard

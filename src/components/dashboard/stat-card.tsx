@@ -110,7 +110,7 @@ export function StatCard({
             </div>
             {Icon && (
               <div className={cn(
-                "rounded-lg p-2 hidden sm:block",
+                "rounded-lg p-1.5 sm:p-2",
                 iconColor === "text-blue-500" && "bg-blue-50",
                 iconColor === "text-blue-400" && "bg-blue-50",
                 iconColor === "text-blue-300" && "bg-blue-50",
@@ -126,7 +126,7 @@ export function StatCard({
                 iconColor === "text-info" && "bg-blue-50",
                 iconColor
               )}>
-                <Icon className="h-5 w-5" />
+                <Icon className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
               </div>
             )}
           </div>

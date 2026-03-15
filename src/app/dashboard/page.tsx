@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import { DashboardSkeleton } from "@/components/dashboard/loading-skeleton";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -684,6 +685,23 @@ export default function OverviewPage() {
             </div>
           </ChartCard>
         )}
+
+        {/* Mobile-only nudge to CTC page */}
+        <Link
+          href="/dashboard/ctc"
+          className="flex items-center justify-between rounded-xl border border-blue-100 bg-linear-to-r from-blue-50 to-white px-4 py-3 sm:hidden"
+        >
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-blue-500/10 p-2">
+              <TrendingUp className="h-4 w-4 text-blue-500" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900">CTC Analytics</p>
+              <p className="text-xs text-muted-foreground">Salary breakdowns, top offers & more</p>
+            </div>
+          </div>
+          <span className="text-blue-500 text-lg leading-none">→</span>
+        </Link>
       </div>
     </PageTransition>
   );
