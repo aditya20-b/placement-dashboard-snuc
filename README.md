@@ -190,8 +190,8 @@ This project is private and intended for use by the Shiv Nadar University Chenna
 
 **Built for SNU Chennai Placement Cell**
 
-
 </div>
+
 
 
 
