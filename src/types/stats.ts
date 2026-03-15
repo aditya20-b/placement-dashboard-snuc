@@ -64,6 +64,7 @@ export interface CompanyStats {
   ctcValues: number[];
   percentage: number;
   visitedOnly?: boolean;
+  offCampus?: boolean;
 }
 
 export interface TopOffer {

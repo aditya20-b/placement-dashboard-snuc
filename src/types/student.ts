@@ -22,6 +22,7 @@ export interface Offer {
   ctc: number;
   offerType: OfferType;
   offerDate: string | null;
+  offCampus: boolean;
 }
 
 /** Joined student record (Master + Offer Details) */

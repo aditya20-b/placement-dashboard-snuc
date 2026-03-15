@@ -56,6 +56,10 @@ function parseStatus(raw: string): Status {
   return "Not Placed";
 }
 
+function isOffCampus(raw: string): boolean {
+  return /\(\s*off\s*campus\s*\)/i.test(raw);
+}
+
 function normalizeCompanyName(raw: string): string {
   return raw
     .replace(/\b(PPO|Hackathon|Internship)\b/gi, "")
@@ -97,6 +101,7 @@ export function joinStudentRecords(
       ctc: parseCTC(row.ctcStipend),
       offerType: parseOfferType(row.offerType),
       offerDate: parseOfferDate(row.offerDate),
+      offCampus: isOffCampus(row.company),
     };
     const existing = offersByRoll.get(rollNo) ?? [];
     existing.push(offer);

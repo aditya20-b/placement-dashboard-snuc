@@ -262,7 +262,7 @@ export function computeCompanyStats(
 ): CompanyStats[] {
   const companyMap = new Map<
     string,
-    { offers: number; dates: Set<string>; ctcs: number[] }
+    { offers: number; dates: Set<string>; ctcs: number[]; offCampusCount: number }
   >();
 
   const totalOffers = students.reduce((sum, s) => sum + s.offers.length, 0);
@@ -274,8 +274,10 @@ export function computeCompanyStats(
         offers: 0,
         dates: new Set<string>(),
         ctcs: [],
+        offCampusCount: 0,
       };
       existing.offers++;
+      if (offer.offCampus) existing.offCampusCount++;
       if (offer.offerDate) existing.dates.add(offer.offerDate);
       if (offer.ctc > 0) existing.ctcs.push(offer.ctc);
       companyMap.set(company, existing);
@@ -292,6 +294,7 @@ export function computeCompanyStats(
         offers: 0,
         dates: date ? new Set([date]) : new Set(),
         ctcs: ctc > 0 ? [ctc] : [],
+        offCampusCount: 0,
       });
       noOfferSet.add(row.company);
     }
@@ -305,6 +308,7 @@ export function computeCompanyStats(
       ctcValues: data.ctcs.sort((a, b) => b - a),
       percentage: totalOffers > 0 ? (data.offers / totalOffers) * 100 : 0,
       visitedOnly: noOfferSet.has(company),
+      offCampus: data.offers > 0 && data.offCampusCount === data.offers,
     }))
     .sort((a, b) => b.offerCount - a.offerCount);
 }

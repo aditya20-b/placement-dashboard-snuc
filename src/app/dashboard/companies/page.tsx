@@ -13,7 +13,7 @@ import { formatINRCompact, formatDate } from "@/lib/format";
 import { CHART_COLORS, VALID_CLASS_SECTIONS, VALID_CLASSES } from "@/lib/constants";
 import { useGroupByClass } from "@/contexts/group-by-class-context";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Info } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -42,6 +42,7 @@ type CompanyRow = {
   ctcValues: number[];
   offerDates: string[];
   visitedOnly: boolean;
+  offCampus: boolean;
 };
 
 export default function CompaniesPage() {
@@ -76,6 +77,7 @@ export default function CompaniesPage() {
         ctcValues: c.ctcValues,
         offerDates: c.offerDates,
         visitedOnly: c.visitedOnly ?? false,
+        offCampus: c.offCampus ?? false,
       })),
     [filteredCompanies]
   );
@@ -99,6 +101,7 @@ export default function CompaniesPage() {
   const totalOffers = companies.reduce((s, c) => s + c.offerCount, 0);
   const avgPerCompany =
     totalCompanies > 0 ? (totalOffers / totalCompanies).toFixed(2) : "0";
+  const offCampusCount = companies.filter((c) => c.offCampus).length;
 
   // All companies for stacked bar chart
   // When grouped: merge "AIDS A" + "AIDS B" → "AIDS", "IOT A" + "IOT B" → "IOT"
@@ -189,7 +192,10 @@ export default function CompaniesPage() {
       </ChartCard>
 
       {/* Company directory table */}
-      <ChartCard title="Company Directory">
+      <ChartCard
+        title="Company Directory"
+        description={offCampusCount > 0 ? `Includes ${offCampusCount} off-campus compan${offCampusCount === 1 ? "y" : "ies"}` : undefined}
+      >
         <div className="mb-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -223,6 +229,11 @@ export default function CompaniesPage() {
                       {row.visitedOnly && (
                         <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
                           No Hires
+                        </span>
+                      )}
+                      {row.offCampus && (
+                        <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-600 border border-purple-200">
+                          Off-Campus
                         </span>
                       )}
                     </div>
