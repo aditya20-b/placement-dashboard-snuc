@@ -8,7 +8,8 @@ import { ChartCard } from "@/components/dashboard/chart-card";
 import { PageTransition, StaggerContainer } from "@/components/dashboard/page-transition";
 import { DataFreshness } from "@/components/dashboard/data-freshness";
 import { formatINRCompact } from "@/lib/format";
-import { CHART_COLORS } from "@/lib/constants";
+import { CHART_COLORS, VALID_CLASS_SECTIONS, VALID_CLASSES } from "@/lib/constants";
+import { useGroupByClass } from "@/contexts/group-by-class-context";
 import { useTableSort } from "@/hooks/use-table-sort";
 import { SortableHeader } from "@/components/dashboard/sortable-header";
 import {
@@ -20,8 +21,10 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ReferenceLine,
   Cell,
+  LineChart,
+  Line,
+  ReferenceLine,
 } from "recharts";
 import {
   Table,
@@ -37,6 +40,7 @@ type TopOfferRow = { rank: number; company: string; ctc: number; offerType: stri
 
 export default function CTCPage() {
   const { data, isLoading, error } = useDashboardData();
+  const { groupByClass } = useGroupByClass();
 
   // Hooks must be called before any early returns
   const percentileRows = useMemo<PercentileRow[]>(() => {
@@ -73,6 +77,29 @@ export default function CTCPage() {
 
   const { ctc } = data;
 
+  // Merge ctcByClass into classes (AIDS A + AIDS B → AIDS) when groupByClass is on
+  const ctcByClassData = groupByClass
+    ? VALID_CLASSES.map((cls) => {
+        const sections = ctc.ctcByClass.filter((d) =>
+          VALID_CLASS_SECTIONS.filter((cs) => cs.startsWith(cls)).includes(d.classSection as typeof VALID_CLASS_SECTIONS[number])
+        );
+        if (sections.length === 0) return null;
+        const totalCount = sections.reduce((s, d) => s + d.count, 0);
+        const weightedAvg = sections.reduce((s, d) => s + d.average * d.count, 0) / totalCount;
+        const weightedMed = sections.reduce((s, d) => s + d.median * d.count, 0) / totalCount;
+        return { classSection: cls, average: weightedAvg, median: weightedMed, count: totalCount };
+      }).filter(Boolean) as typeof ctc.ctcByClass
+    : ctc.ctcByClass;
+
+  // Box plot as line chart
+  const boxPlotData = [
+    { label: "Min", value: ctc.boxPlot.min },
+    { label: "P25", value: ctc.boxPlot.p25 },
+    { label: "Median", value: ctc.boxPlot.median },
+    { label: "Average", value: Math.round(ctc.boxPlot.average) },
+    { label: "P75", value: ctc.boxPlot.p75 },
+    { label: "Max", value: ctc.boxPlot.max },
+  ];
   // Vibrant multi-hue for histogram
   const histogramColors = [
     "#93C5FD",
@@ -170,76 +197,36 @@ export default function CTCPage() {
           </Table>
         </ChartCard>
 
-        {/* Box Plot Summary */}
-        <ChartCard title="CTC Distribution Summary" description="Min, P25, Median, P75, Max">
+        {/* Box Plot Summary — line chart showing the distribution spread */}
+        <ChartCard title="CTC Distribution Summary" description="Spread across Min, P25, Median, Average, P75, Max">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={[
-                  { label: "Min", value: ctc.boxPlot.min },
-                  { label: "P25", value: ctc.boxPlot.p25 },
-                  { label: "Median", value: ctc.boxPlot.median },
-                  { label: "Average", value: ctc.boxPlot.average },
-                  { label: "P75", value: ctc.boxPlot.p75 },
-                  { label: "Max", value: ctc.boxPlot.max },
-                ]}
-              >
+              <LineChart data={boxPlotData} margin={{ top: 10, right: 20, bottom: 5, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="label" />
                 <YAxis tickFormatter={(v) => formatINRCompact(v)} />
                 <Tooltip formatter={(v) => formatINRCompact(Number(v))} />
-                <ReferenceLine y={ctc.boxPlot.average} stroke={CHART_COLORS.sequential[1]} strokeDasharray="5 5" />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  {["#93C5FD","#3B82F6","#2563EB","#F59E0B","#1D4ED8","#7C3AED"].map((color, i) => (
-                    <Cell key={i} fill={color} />
-                  ))}
-                </Bar>
-              </BarChart>
+                <ReferenceLine y={ctc.boxPlot.average} stroke={CHART_COLORS.sequential[1]} strokeDasharray="5 5" label={{ value: "Avg", position: "insideTopRight", fontSize: 11 }} />
+                <Line type="monotone" dataKey="value" stroke={CHART_COLORS.sequential[0]} strokeWidth={2} dot={{ r: 5, fill: CHART_COLORS.sequential[0] }} />
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </ChartCard>
       </div>
 
-      {/* CTC by Offer Type */}
-      {ctc.ctcByOfferType.length > 0 && (
-        <ChartCard title="Average CTC by Offer Type" description="Excluding internships">
+      {/* CTC by Class — respects groupByClass toggle */}
+      {ctcByClassData.length > 0 && (
+        <ChartCard title={`Average CTC by ${groupByClass ? "Class" : "Class Section"}`} description="Excluding internships">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ctc.ctcByOfferType}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="offerType" />
-                <YAxis tickFormatter={(v) => formatINRCompact(v)} />
-                <Tooltip formatter={(v) => formatINRCompact(Number(v))} />
-                <Legend />
-                <Bar dataKey="average" name="Avg CTC" radius={[4, 4, 0, 0]}>
-                  {ctc.ctcByOfferType.map((d) => (
-                    <Cell key={d.offerType} fill={CHART_COLORS.offerType[d.offerType as keyof typeof CHART_COLORS.offerType] ?? CHART_COLORS.sequential[0]} />
-                  ))}
-                </Bar>
-                <Bar dataKey="median" name="Median CTC" radius={[4, 4, 0, 0]} fill={CHART_COLORS.sequential[3]} opacity={0.7} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-      )}
-
-      {/* CTC by Class */}
-      {ctc.ctcByClass.length > 0 && (
-        <ChartCard title="Average CTC by Class" description="Excluding internships">
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ctc.ctcByClass}>
+              <BarChart data={ctcByClassData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="classSection" />
                 <YAxis tickFormatter={(v) => formatINRCompact(v)} />
                 <Tooltip formatter={(v) => formatINRCompact(Number(v))} />
                 <Legend />
-                <Bar dataKey="average" name="Avg CTC" radius={[4, 4, 0, 0]}>
-                  {ctc.ctcByClass.map((d) => (
-                    <Cell key={d.classSection} fill={CHART_COLORS.class[d.classSection as keyof typeof CHART_COLORS.class] ?? CHART_COLORS.sequential[0]} />
-                  ))}
-                </Bar>
-                <Bar dataKey="median" name="Median CTC" radius={[4, 4, 0, 0]} fill={CHART_COLORS.sequential[3]} opacity={0.7} />
+                <Bar dataKey="average" name="Avg CTC" fill={CHART_COLORS.sequential[0]} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="median" name="Median CTC" fill={CHART_COLORS.sequential[1]} radius={[4, 4, 0, 0]} opacity={0.75} />
               </BarChart>
             </ResponsiveContainer>
           </div>
