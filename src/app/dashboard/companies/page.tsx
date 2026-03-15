@@ -39,6 +39,7 @@ type CompanyRow = {
   percentage: number;
   dates: string;
   ctcRange: string;
+  highestCtc: number;
   ctcValues: number[];
   offerDates: string[];
   visitedOnly: boolean;
@@ -74,6 +75,7 @@ export default function CompaniesPage() {
               ? formatINRCompact(c.ctcValues[0])
               : `${formatINRCompact(c.ctcValues[c.ctcValues.length - 1])} - ${formatINRCompact(c.ctcValues[0])}`
             : "—",
+        highestCtc: c.ctcValues[0] ?? 0,
         ctcValues: c.ctcValues,
         offerDates: c.offerDates,
         visitedOnly: c.visitedOnly ?? false,
@@ -215,8 +217,8 @@ export default function CompaniesPage() {
                 <SortableHeader label="Company" sortDirection={tableSort.getSortIndicator("company")} onSort={() => tableSort.requestSort("company")} />
                 <SortableHeader label="Offers" sortDirection={tableSort.getSortIndicator("offerCount")} onSort={() => tableSort.requestSort("offerCount")} className="text-center" />
                 <TableHead className="hidden sm:table-cell">Dates</TableHead>
-                <TableHead className="text-right hidden sm:table-cell">CTC Range</TableHead>
-                <TableHead className="text-right sm:hidden">CTC</TableHead>
+                <SortableHeader label="CTC Range" sortDirection={tableSort.getSortIndicator("highestCtc")} onSort={() => tableSort.requestSort("highestCtc")} className="text-right hidden sm:table-cell" />
+                <SortableHeader label="CTC" sortDirection={tableSort.getSortIndicator("highestCtc")} onSort={() => tableSort.requestSort("highestCtc")} className="text-right sm:hidden" />
                 <SortableHeader label="%" sortDirection={tableSort.getSortIndicator("percentage")} onSort={() => tableSort.requestSort("percentage")} className="text-right hidden sm:table-cell" />
               </TableRow>
             </TableHeader>
