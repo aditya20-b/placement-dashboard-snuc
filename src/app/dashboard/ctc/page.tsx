@@ -207,7 +207,7 @@ export default function CTCPage() {
                 <Tooltip formatter={(v) => formatINRCompact(Number(v))} />
                 <ReferenceLine y={ctc.boxPlot.average} stroke={CHART_COLORS.sequential[1]} strokeDasharray="5 5" label={{ value: "Avg", position: "insideTopRight", fontSize: 11 }} />
                 <Line type="monotone" dataKey="value" stroke={CHART_COLORS.sequential[0]} strokeWidth={2} dot={{ r: 5, fill: CHART_COLORS.sequential[0] }}>
-                  <LabelList dataKey="value" position="top" fontSize={11} formatter={(v: number) => formatINRCompact(v)} />
+                  <LabelList dataKey="value" position="top" fontSize={11} formatter={(v: unknown) => formatINRCompact(Number(v))} />
                 </Line>
               </LineChart>
             </ResponsiveContainer>
@@ -227,10 +227,10 @@ export default function CTCPage() {
                 <Tooltip formatter={(v) => formatINRCompact(Number(v))} />
                 <Legend />
                 <Bar dataKey="average" name="Avg CTC" fill={CHART_COLORS.sequential[0]} radius={[4, 4, 0, 0]}>
-                  <LabelList dataKey="average" position="top" fontSize={11} fontWeight={600} formatter={(v: number) => formatINRCompact(v)} />
+                  <LabelList dataKey="average" position="top" fontSize={11} fontWeight={600} formatter={(v: unknown) => formatINRCompact(Number(v))} />
                 </Bar>
                 <Bar dataKey="median" name="Median CTC" fill={CHART_COLORS.sequential[1]} radius={[4, 4, 0, 0]} opacity={0.75}>
-                  <LabelList dataKey="median" position="top" fontSize={11} formatter={(v: number) => formatINRCompact(v)} />
+                  <LabelList dataKey="median" position="top" fontSize={11} formatter={(v: unknown) => formatINRCompact(Number(v))} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
