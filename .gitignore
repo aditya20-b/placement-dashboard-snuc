@@ -37,6 +37,9 @@ yarn-error.log*
 # service account keys
 service-account*.json
 
+# local scripts (may contain credentials)
+/scripts/
+
 # vercel
 .vercel
 
