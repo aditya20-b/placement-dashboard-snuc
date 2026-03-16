@@ -5,9 +5,9 @@ import { DashboardNav } from "./nav";
 import { GroupByClassProvider } from "@/contexts/group-by-class-context";
 
 export const metadata: Metadata = {
-  title: "Overview",
+  title: "SNU Chennai Placement Statistics 2026 — Batch 2022-26",
   description:
-    "Live placement statistics for SNU Chennai Batch 2022-26: total students, offer counts, average CTC, company count, and class-wise breakdowns.",
+    "Live placement data for Shiv Nadar University Chennai Batch 2022-26. Placement percentage, average CTC, highest package, total offers, and company-wise breakdown for 2026 placements.",
 };
 
 export default async function DashboardLayout({
