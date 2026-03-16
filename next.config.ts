@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' sheets.googleapis.com *.upstash.io",
+              "connect-src 'self' sheets.googleapis.com *.upstash.io vitals.vercel-insights.com",
               "frame-ancestors 'none'",
             ].join("; "),
           },
