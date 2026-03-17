@@ -225,12 +225,11 @@ export function computeCTCStats(students: StudentRecord[]): CTCStats {
     return { offerType: type, average: avg, median: med, count: vals.length };
   }).filter(Boolean) as { offerType: string; average: number; median: number; count: number }[];
 
-  // CTC by class section
+  // CTC by class section — one value per student (best non-internship offer)
   const ctcByClass = VALID_CLASS_SECTIONS.map((cs) => {
     const vals = students
-      .filter((s) => s.classSection === cs)
-      .flatMap((s) => s.offers.filter((o) => o.offerType !== "Internship" && o.ctc > 0))
-      .map((o) => o.ctc)
+      .filter((s) => s.classSection === cs && s.bestOffer && s.bestOffer.offerType !== "Internship" && s.bestOffer.ctc > 0)
+      .map((s) => s.bestOffer!.ctc)
       .sort((a, b) => b - a);
     if (vals.length === 0) return null;
     const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
