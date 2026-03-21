@@ -13,6 +13,7 @@ import {
   Users,
   FileDown,
   KeyRound,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,7 @@ const NAV_ICONS: Record<string, typeof LayoutDashboard> = {
   "/dashboard/ctc": TrendingUp,
   "/dashboard/companies": Building2,
   "/dashboard/students": Users,
+  "/dashboard/drives": CalendarDays,
   "/dashboard/export": FileDown,
 };
 
