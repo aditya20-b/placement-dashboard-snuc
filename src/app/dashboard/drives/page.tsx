@@ -558,20 +558,20 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
 
   const total = summary.total;
 
-  // Chart 1: drives vs offers per handler (grouped bar)
+  // Drives vs offers per handler (grouped horizontal bar)
   const drivesOffersData = handlerStats.map((h) => ({
     name: h.name,
     Drives: h.drivesHandled,
     Offers: h.offersFromDrives,
   }));
 
-  // Chart 2: drives handled per handler (simple coloured bar)
+  // Drives handled per handler (simple coloured horizontal bar)
   const drivesData = handlerStats.map((h) => ({
     name: h.name,
     Drives: h.drivesHandled,
   }));
 
-  // Chart 3: role breakdown stacked bar per handler
+  // Role breakdown stacked horizontal bar per handler
   const roleBreakdownData = handlerStats.map((h) => ({
     name: h.name,
     "End-to-End": h.roleBreakdown["End-to-End"],
@@ -580,7 +580,7 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
     Support: h.roleBreakdown["Support"],
   }));
 
-  // Chart 4: drive type donut
+  // Drive type donut
   const driveTypeCounts = new Map<string, number>();
   for (const c of companies) {
     const key = c.driveType ?? "Unclassified";
@@ -589,6 +589,40 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
   const driveTypeData = [...driveTypeCounts.entries()]
     .map(([name, value]) => ({ name, value, pct: Math.round((value / total) * 100) }))
     .sort((a, b) => b.value - a.value);
+
+  // Company handler count distribution (#3) — how many companies had 0, 1, 2, 3+ handlers
+  const handlerCountBuckets = [
+    { label: "No handler", count: 0 },
+    { label: "1 handler", count: 0 },
+    { label: "2 handlers", count: 0 },
+    { label: "3+ handlers", count: 0 },
+  ];
+  for (const c of companies) {
+    const n = c.handlers.length;
+    if (n === 0) handlerCountBuckets[0].count++;
+    else if (n === 1) handlerCountBuckets[1].count++;
+    else if (n === 2) handlerCountBuckets[2].count++;
+    else handlerCountBuckets[3].count++;
+  }
+
+  // Unique vs shared drives per handler (#2)
+  // Build a map: company → set of handler names
+  const companyHandlerSets = new Map<string, Set<string>>();
+  for (const c of companies) {
+    if (c.handlers.length > 0) {
+      companyHandlerSets.set(c.company, new Set(c.handlers.map((h) => h.handler)));
+    }
+  }
+  const uniqueSharedData = handlerStats.map((h) => {
+    let solo = 0;
+    let shared = 0;
+    for (const comp of h.companies) {
+      const set = companyHandlerSets.get(comp);
+      if (set && set.size === 1) solo++;
+      else shared++;
+    }
+    return { name: h.name, Solo: solo, Shared: shared };
+  });
 
   return (
     <div className="space-y-6">
@@ -620,52 +654,21 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
         />
       </div>
 
-      {/* Charts row */}
+      {/* Row 1: Compact charts — drive type donut + company handler distribution */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Chart 1: Drives vs Offers — horizontal grouped, scales with handler count */}
-        <ChartCard
-          title="Drives vs Offers per Handler"
-          description="Drives handled alongside total offers from those drives"
-        >
-          <div style={{ height: Math.max(200, drivesOffersData.length * 48) }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={drivesOffersData}
-                layout="vertical"
-                margin={{ top: 4, right: 48, left: 8, bottom: 4 }}
-                barCategoryGap="20%"
-                barGap={3}
-              >
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
-                <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={72} />
-                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
-                <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                <Bar dataKey="Drives" fill="#2563EB" radius={[0, 4, 4, 0]}>
-                  <LabelList dataKey="Drives" position="right" style={{ fontSize: 11, fontWeight: 600, fill: "#374151" }} />
-                </Bar>
-                <Bar dataKey="Offers" fill="#10B981" radius={[0, 4, 4, 0]}>
-                  <LabelList dataKey="Offers" position="right" style={{ fontSize: 11, fontWeight: 600, fill: "#374151" }} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        {/* Chart 2: Drive type breakdown donut — legend below to avoid overflow */}
         <ChartCard
           title="Drive Type Breakdown"
           description="Distribution of all companies by drive type"
         >
-          <div className="h-72">
+          <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={driveTypeData}
                   cx="50%"
-                  cy="42%"
-                  innerRadius={55}
-                  outerRadius={85}
+                  cy="45%"
+                  innerRadius={48}
+                  outerRadius={76}
                   paddingAngle={2}
                   dataKey="value"
                 >
@@ -683,7 +686,7 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
                   verticalAlign="bottom"
                   iconType="circle"
                   iconSize={8}
-                  wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                  wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
                   formatter={(value) => {
                     const item = driveTypeData.find((d) => d.name === value);
                     return `${value} (${item?.value ?? 0})`;
@@ -694,7 +697,61 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
           </div>
         </ChartCard>
 
-        {/* Chart 3: Role breakdown — horizontal stacked, scales with handler count */}
+        <ChartCard
+          title="Handlers per Company"
+          description="How many companies have 0, 1, 2, or 3+ handlers assigned"
+        >
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={handlerCountBuckets} margin={{ top: 20, right: 10, left: 0, bottom: 0 }} barCategoryGap="30%">
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis dataKey="label" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
+                <Bar dataKey="count" name="Companies" radius={[4, 4, 0, 0]}>
+                  <LabelList dataKey="count" position="top" style={{ fontSize: 12, fontWeight: 700, fill: "#374151" }} />
+                  {handlerCountBuckets.map((_, i) => (
+                    <Cell key={i} fill={["#EF4444", "#F59E0B", "#2563EB", "#10B981"][i]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </ChartCard>
+      </div>
+
+      {/* Row 2: Drives vs Offers — full width, horizontal grouped */}
+      <ChartCard
+        title="Drives vs Offers per Handler"
+        description="Drives handled alongside total offers from those drives"
+      >
+        <div style={{ height: Math.max(200, drivesOffersData.length * 48) }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={drivesOffersData}
+              layout="vertical"
+              margin={{ top: 4, right: 48, left: 8, bottom: 4 }}
+              barCategoryGap="20%"
+              barGap={3}
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+              <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={80} />
+              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
+              <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+              <Bar dataKey="Drives" fill="#2563EB" radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="Drives" position="right" style={{ fontSize: 11, fontWeight: 600, fill: "#374151" }} />
+              </Bar>
+              <Bar dataKey="Offers" fill="#10B981" radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="Offers" position="right" style={{ fontSize: 11, fontWeight: 600, fill: "#374151" }} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartCard>
+
+      {/* Row 3: Role breakdown + Drives handled side by side */}
+      <div className="grid gap-4 lg:grid-cols-2">
         <ChartCard
           title="Role Breakdown per Handler"
           description="Number of drives per role type for each handler"
@@ -709,7 +766,7 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
               >
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
                 <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={72} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={80} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
                 <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                 {(Object.keys(ROLE_COLORS) as DriveRole[]).map((role) => (
@@ -720,7 +777,6 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
           </div>
         </ChartCard>
 
-        {/* Chart 4: Drives handled per handler — horizontal bar, scales with handler count */}
         <ChartCard
           title="Drives Handled per Handler"
           description="Total number of drives each person handled"
@@ -735,7 +791,7 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
               >
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
                 <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 13, fontWeight: 500 }} axisLine={false} tickLine={false} width={72} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 13, fontWeight: 500 }} axisLine={false} tickLine={false} width={80} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
                 <Bar dataKey="Drives" radius={[0, 4, 4, 0]}>
                   <LabelList dataKey="Drives" position="right" style={{ fontSize: 12, fontWeight: 700, fill: "#374151" }} />
@@ -748,6 +804,31 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
           </div>
         </ChartCard>
       </div>
+
+      {/* Row 4: Solo vs Shared drives — full width, horizontal stacked */}
+      <ChartCard
+        title="Solo vs Shared Drives"
+        description="Drives handled alone vs co-handled with other team members"
+      >
+        <div style={{ height: Math.max(200, uniqueSharedData.length * 40) }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={uniqueSharedData}
+              layout="vertical"
+              margin={{ top: 4, right: 16, left: 8, bottom: 4 }}
+              barCategoryGap="25%"
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+              <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={80} />
+              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
+              <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+              <Bar dataKey="Solo" stackId="split" fill="#F59E0B" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="Shared" stackId="split" fill="#2563EB" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </ChartCard>
 
       {/* Handler cards */}
       <div className="space-y-3">
