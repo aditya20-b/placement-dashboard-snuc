@@ -20,5 +20,6 @@ export const navItems: NavItem[] = [
   { label: "CTC Analytics", href: "/dashboard/ctc", adminOnly: false },
   { label: "Companies", href: "/dashboard/companies", adminOnly: false },
   { label: "Students", href: "/dashboard/students", adminOnly: true },
+  { label: "Drives", href: "/dashboard/drives", adminOnly: true },
   { label: "Export", href: "/dashboard/export", adminOnly: true },
 ];

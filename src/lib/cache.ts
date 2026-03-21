@@ -8,6 +8,10 @@ interface CacheEntry<T> {
 
 const cache = new Map<string, CacheEntry<unknown>>();
 
+export function deleteCache(key: string): void {
+  cache.delete(key);
+}
+
 /**
  * Simple in-memory cache with TTL.
  * - Stores data for CACHE_TTL seconds (5 min)

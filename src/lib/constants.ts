@@ -1,4 +1,5 @@
 import type { Class, ClassSection, Choice, OfferType, Section, Status } from "@/types";
+import type { DriveRole, DriveType } from "@/types/drives";
 
 // ─── Validation allowlists ──────────────────────────────
 
@@ -54,6 +55,7 @@ export const CACHE_KEYS = {
   CTC_STATS: "stats:ctc",
   COMPANY_STATS: "stats:companies",
   STUDENT_RECORDS: "data:students",
+  DRIVE_DATA: "data:drives",
 } as const;
 
 /** Cache TTL in seconds */
@@ -149,3 +151,26 @@ export const OFFER_COLUMNS = {
   OFFER_TYPE: 4,
   OFFER_DATE: 5,
 } as const;
+
+// ─── Drive Constants ────────────────────────────────────
+
+export const VALID_DRIVE_ROLES: DriveRole[] = [
+  "End-to-End",
+  "Volunteering",
+  "Coordination",
+  "Support",
+];
+
+export const VALID_DRIVE_TYPES: DriveType[] = [
+  "On Campus",
+  "On Campus (Online)",
+  "Off Campus",
+  "PPO / Intern Conversion",
+  "Half Campus",
+  "Online Only",
+];
+
+export const EXCLUDED_FROM_DENOMINATOR = new Set<DriveType>([
+  "Off Campus",
+  "PPO / Intern Conversion",
+]);

@@ -115,6 +115,128 @@ export async function fetchTotalCompanyCount(): Promise<number> {
   return rows.filter((row) => row[0]?.trim()).length;
 }
 
+// ─── Drive Handlers ─────────────────────────────────────
+
+export async function fetchDriveHandlers(): Promise<
+  { rowIndex: number; company: string; handler: string; role: string; notes: string }[]
+> {
+  const sheets = getSheets();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    range: "Drive_Handlers!A2:D",
+  });
+
+  const rows = res.data.values ?? [];
+  return rows.map((row, i) => ({
+    rowIndex: i + 2, // 1-based sheet row (header is row 1)
+    company: row[0]?.trim() ?? "",
+    handler: row[1]?.trim() ?? "",
+    role: row[2]?.trim() ?? "",
+    notes: row[3]?.trim() ?? "",
+  }));
+}
+
+export async function fetchDriveMeta(): Promise<
+  { company: string; driveType: string; notes: string }[]
+> {
+  const sheets = getSheets();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    range: "Drive_Meta!A2:C",
+  });
+
+  const rows = res.data.values ?? [];
+  return rows
+    .filter((row) => row[0]?.trim())
+    .map((row) => ({
+      company: row[0]?.trim() ?? "",
+      driveType: row[1]?.trim() ?? "",
+      notes: row[2]?.trim() ?? "",
+    }));
+}
+
+export async function appendDriveHandler(
+  company: string,
+  handler: string,
+  role: string,
+  notes: string,
+): Promise<void> {
+  const sheets = getSheets();
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    range: "Drive_Handlers!A2:D",
+    valueInputOption: "USER_ENTERED",
+    requestBody: {
+      values: [[company, handler, role, notes]],
+    },
+  });
+}
+
+export async function deleteDriveHandlerRow(rowIndex: number): Promise<void> {
+  const sheets = getSheets();
+
+  // Fetch the sheetId for Drive_Handlers
+  const meta = await sheets.spreadsheets.get({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+  });
+  const sheet = meta.data.sheets?.find(
+    (s) => s.properties?.title === "Drive_Handlers",
+  );
+  if (!sheet?.properties || sheet.properties.sheetId == null) {
+    throw new Error("Drive_Handlers sheet not found");
+  }
+  const sheetId = sheet.properties.sheetId;
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: process.env.GOOGLE_SHEET_ID,
+    requestBody: {
+      requests: [
+        {
+          deleteRange: {
+            range: {
+              sheetId,
+              startRowIndex: rowIndex - 1,
+              endRowIndex: rowIndex,
+            },
+            shiftDimension: "ROWS",
+          },
+        },
+      ],
+    },
+  });
+}
+
+export async function upsertDriveMeta(
+  company: string,
+  driveType: string,
+): Promise<void> {
+  const sheets = getSheets();
+  const existing = await fetchDriveMeta();
+  const idx = existing.findIndex((r) => r.company === company);
+
+  if (idx !== -1) {
+    // Row is (idx + 2): header is row 1, data starts at row 2, idx is 0-based
+    const rowNumber = idx + 2;
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: `Drive_Meta!B${rowNumber}`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [[driveType]],
+      },
+    });
+  } else {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: "Drive_Meta!A2:C",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [[company, driveType, ""]],
+      },
+    });
+  }
+}
+
 // ─── Visitor Logging ────────────────────────────────────
 
 /**
