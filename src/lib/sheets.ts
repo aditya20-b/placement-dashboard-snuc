@@ -137,12 +137,12 @@ export async function fetchDriveHandlers(): Promise<
 }
 
 export async function fetchDriveMeta(): Promise<
-  { company: string; driveType: string; notes: string }[]
+  { company: string; driveType: string; notes: string; countsOverride: string }[]
 > {
   const sheets = getSheets();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    range: "Drive_Meta!A2:C",
+    range: "Drive_Meta!A2:D",
   });
 
   const rows = res.data.values ?? [];
@@ -152,6 +152,7 @@ export async function fetchDriveMeta(): Promise<
       company: row[0]?.trim() ?? "",
       driveType: row[1]?.trim() ?? "",
       notes: row[2]?.trim() ?? "",
+      countsOverride: row[3]?.trim().toLowerCase() ?? "",
     }));
 }
 
@@ -233,6 +234,33 @@ export async function upsertDriveMeta(
       requestBody: {
         values: [[company, driveType, ""]],
       },
+    });
+  }
+}
+
+export async function upsertDriveCountsOverride(
+  company: string,
+  override: "yes" | "no" | "",
+): Promise<void> {
+  const sheets = getSheets();
+  const existing = await fetchDriveMeta();
+  const idx = existing.findIndex((r) => r.company === company);
+
+  if (idx !== -1) {
+    const rowNumber = idx + 2;
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: `Drive_Meta!D${rowNumber}`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [[override]] },
+    });
+  } else {
+    // Row doesn't exist yet — create it with empty drive type
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: "Drive_Meta!A2:D",
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [[company, "", "", override]] },
     });
   }
 }

@@ -68,12 +68,13 @@ export async function fetchAndComputeDrives(): Promise<DriveData> {
   // Build Drive_Meta lookup
   const metaByCompany = new Map<
     string,
-    { driveType: string; notes: string }
+    { driveType: string; notes: string; countsOverride: string }
   >();
   for (const row of metaRows) {
     metaByCompany.set(row.company, {
       driveType: row.driveType,
       notes: row.notes,
+      countsOverride: row.countsOverride ?? "",
     });
   }
 
@@ -115,9 +116,10 @@ export async function fetchAndComputeDrives(): Promise<DriveData> {
         ? (rawDriveType as DriveType)
         : null;
 
-    const countsInDenominator = validDriveType
-      ? !EXCLUDED_FROM_DENOMINATOR.has(validDriveType)
-      : true; // unclassified counts by default
+    const rawOverride = meta?.countsOverride ?? "";
+    const countsOverride = (rawOverride === "yes" || rawOverride === "no" ? rawOverride : "") as "yes" | "no" | "";
+    const derived = validDriveType ? !EXCLUDED_FROM_DENOMINATOR.has(validDriveType) : true;
+    const countsInDenominator = countsOverride === "yes" ? true : countsOverride === "no" ? false : derived;
 
     const offerData = offersByCompany.get(company);
     const offersGiven = offerData?.count ?? 0;
@@ -135,6 +137,7 @@ export async function fetchAndComputeDrives(): Promise<DriveData> {
       offersGiven,
       driveType: validDriveType,
       countsInDenominator,
+      countsOverride,
       handlers: handlersByCompany.get(company) ?? [],
     });
 

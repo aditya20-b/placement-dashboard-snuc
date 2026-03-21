@@ -28,6 +28,7 @@ export interface CompanyDriveView {
   offersGiven: number;
   driveType: DriveType | null;
   countsInDenominator: boolean;
+  countsOverride: "yes" | "no" | ""; // "" = derived from drive type
   handlers: HandlerEntry[];
 }
 

@@ -86,3 +86,20 @@ export function useUpdateDriveType() {
     },
   });
 }
+
+export function useUpdateCountsOverride() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: { company: string; countsOverride: "yes" | "no" | "" }) => {
+      const res = await fetch("/api/drives/meta", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(`Failed to update counts override: ${res.status}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["drives"] });
+    },
+  });
+}

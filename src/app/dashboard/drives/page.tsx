@@ -7,6 +7,7 @@ import {
   useAddHandler,
   useDeleteHandler,
   useUpdateDriveType,
+  useUpdateCountsOverride,
 } from "@/hooks/use-drives-data";
 import { DashboardSkeleton } from "@/components/dashboard/loading-skeleton";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -71,15 +72,46 @@ import type { CompanyDriveView, DriveRole, DriveType, HandlerEntry } from "@/typ
 
 // ─── Helper components ──────────────────────────────────
 
-function CountsPill({ counts }: { counts: boolean }) {
-  return counts ? (
-    <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 border border-green-200">
-      In
-    </span>
-  ) : (
-    <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 border border-gray-200">
-      Out
-    </span>
+function CountsPill({
+  company,
+  counts,
+  override,
+}: {
+  company: string;
+  counts: boolean;
+  override: "yes" | "no" | "";
+}) {
+  const updateOverride = useUpdateCountsOverride();
+
+  function handleClick() {
+    // Cycle: derived-in → forced-no → derived (clear) / derived-out → forced-yes → derived (clear)
+    let next: "yes" | "no" | "";
+    if (override === "") next = counts ? "no" : "yes";
+    else next = ""; // clear override back to derived
+    updateOverride.mutate({ company, countsOverride: next });
+  }
+
+  const isOverridden = override !== "";
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={updateOverride.isPending}
+      title={isOverridden ? "Manually overridden — click to clear" : "Click to override"}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium transition-colors hover:opacity-80 ${
+        counts
+          ? "bg-green-100 text-green-800 border-green-200"
+          : "bg-gray-100 text-gray-500 border-gray-200"
+      }`}
+    >
+      {counts ? "In" : "Out"}
+      {isOverridden && (
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${counts ? "bg-green-500" : "bg-gray-400"}`}
+          aria-label="manually overridden"
+        />
+      )}
+    </button>
   );
 }
 
@@ -452,7 +484,11 @@ function CompanyDrivesTab({ companies, allHandlerNames }: CompanyDrivesTabProps)
                     <DriveTypeSelect company={c.company} value={c.driveType} />
                   </TableCell>
                   <TableCell className="text-center">
-                    <CountsPill counts={c.countsInDenominator} />
+                    <CountsPill
+                      company={c.company}
+                      counts={c.countsInDenominator}
+                      override={c.countsOverride}
+                    />
                   </TableCell>
                   <TableCell>
                     <HandlerChips
