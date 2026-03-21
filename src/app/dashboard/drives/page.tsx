@@ -622,44 +622,50 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
 
       {/* Charts row */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Chart 1: Drives handled vs Offers per handler */}
+        {/* Chart 1: Drives vs Offers — horizontal grouped, scales with handler count */}
         <ChartCard
           title="Drives vs Offers per Handler"
           description="Drives handled alongside total offers from those drives"
         >
-          <div className="h-64">
+          <div style={{ height: Math.max(200, drivesOffersData.length * 48) }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={drivesOffersData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }} barCategoryGap="25%">
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <BarChart
+                data={drivesOffersData}
+                layout="vertical"
+                margin={{ top: 4, right: 48, left: 8, bottom: 4 }}
+                barCategoryGap="20%"
+                barGap={3}
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={72} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
                 <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
-                <Bar dataKey="Drives" fill="#2563EB" radius={[4, 4, 0, 0]}>
-                  <LabelList dataKey="Drives" position="top" style={{ fontSize: 11, fontWeight: 600, fill: "#2563EB" }} />
+                <Bar dataKey="Drives" fill="#2563EB" radius={[0, 4, 4, 0]}>
+                  <LabelList dataKey="Drives" position="right" style={{ fontSize: 11, fontWeight: 600, fill: "#374151" }} />
                 </Bar>
-                <Bar dataKey="Offers" fill="#10B981" radius={[4, 4, 0, 0]}>
-                  <LabelList dataKey="Offers" position="top" style={{ fontSize: 11, fontWeight: 600, fill: "#10B981" }} />
+                <Bar dataKey="Offers" fill="#10B981" radius={[0, 4, 4, 0]}>
+                  <LabelList dataKey="Offers" position="right" style={{ fontSize: 11, fontWeight: 600, fill: "#374151" }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </ChartCard>
 
-        {/* Chart 2: Drive type breakdown donut with legend */}
+        {/* Chart 2: Drive type breakdown donut — legend below to avoid overflow */}
         <ChartCard
           title="Drive Type Breakdown"
           description="Distribution of all companies by drive type"
         >
-          <div className="h-64">
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={driveTypeData}
-                  cx="42%"
-                  cy="50%"
-                  innerRadius={58}
-                  outerRadius={90}
+                  cx="50%"
+                  cy="42%"
+                  innerRadius={55}
+                  outerRadius={85}
                   paddingAngle={2}
                   dataKey="value"
                 >
@@ -672,22 +678,15 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
                   formatter={(value, name) => [`${value} (${Math.round((Number(value) / total) * 100)}%)`, name]}
                 />
                 <Legend
-                  layout="vertical"
-                  align="right"
-                  verticalAlign="middle"
+                  layout="horizontal"
+                  align="center"
+                  verticalAlign="bottom"
                   iconType="circle"
                   iconSize={8}
-                  formatter={(value, entry) => {
+                  wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                  formatter={(value) => {
                     const item = driveTypeData.find((d) => d.name === value);
-                    return (
-                      <span style={{ fontSize: 11, color: "#374151" }}>
-                        {value}{" "}
-                        <span style={{ color: (entry as { color?: string }).color, fontWeight: 600 }}>
-                          {item?.value}
-                        </span>
-                        <span style={{ color: "#9CA3AF" }}> ({item?.pct}%)</span>
-                      </span>
-                    );
+                    return `${value} (${item?.value ?? 0})`;
                   }}
                 />
               </PieChart>
@@ -695,17 +694,22 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
           </div>
         </ChartCard>
 
-        {/* Chart 3: Role breakdown stacked bar — no radius on stacked segments */}
+        {/* Chart 3: Role breakdown — horizontal stacked, scales with handler count */}
         <ChartCard
           title="Role Breakdown per Handler"
           description="Number of drives per role type for each handler"
         >
-          <div className="h-64">
+          <div style={{ height: Math.max(200, roleBreakdownData.length * 40) }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={roleBreakdownData} margin={{ top: 8, right: 10, left: 0, bottom: 0 }} barCategoryGap="25%">
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <BarChart
+                data={roleBreakdownData}
+                layout="vertical"
+                margin={{ top: 4, right: 16, left: 8, bottom: 4 }}
+                barCategoryGap="25%"
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} width={72} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
                 <Legend wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                 {(Object.keys(ROLE_COLORS) as DriveRole[]).map((role) => (
@@ -716,12 +720,12 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
           </div>
         </ChartCard>
 
-        {/* Chart 4: Drives handled per handler — horizontal bar, scales with number of people */}
+        {/* Chart 4: Drives handled per handler — horizontal bar, scales with handler count */}
         <ChartCard
           title="Drives Handled per Handler"
           description="Total number of drives each person handled"
         >
-          <div style={{ height: Math.max(180, drivesData.length * 40) }}>
+          <div style={{ height: Math.max(200, drivesData.length * 40) }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={drivesData}
