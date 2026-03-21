@@ -716,20 +716,25 @@ function HandlerStatsTab({ summary, handlerStats, companies }: HandlerStatsTabPr
           </div>
         </ChartCard>
 
-        {/* Chart 4: Drives handled per handler — simple coloured bar */}
+        {/* Chart 4: Drives handled per handler — horizontal bar, scales with number of people */}
         <ChartCard
           title="Drives Handled per Handler"
           description="Total number of drives each person handled"
         >
-          <div className="h-64">
+          <div style={{ height: Math.max(180, drivesData.length * 40) }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={drivesData} margin={{ top: 20, right: 10, left: 0, bottom: 0 }} barCategoryGap="30%">
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <BarChart
+                data={drivesData}
+                layout="vertical"
+                margin={{ top: 4, right: 48, left: 8, bottom: 4 }}
+                barCategoryGap="25%"
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
+                <XAxis type="number" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 13, fontWeight: 500 }} axisLine={false} tickLine={false} width={72} />
                 <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }} />
-                <Bar dataKey="Drives" radius={[4, 4, 0, 0]}>
-                  <LabelList dataKey="Drives" position="top" style={{ fontSize: 12, fontWeight: 700 }} />
+                <Bar dataKey="Drives" radius={[0, 4, 4, 0]}>
+                  <LabelList dataKey="Drives" position="right" style={{ fontSize: 12, fontWeight: 700, fill: "#374151" }} />
                   {drivesData.map((_, i) => (
                     <Cell key={i} fill={HANDLER_COLORS[i % HANDLER_COLORS.length]} />
                   ))}
