@@ -20,7 +20,7 @@ function useAnimatedNumber(target: number, duration = 1200) {
       const progress = Math.min(elapsed / duration, 1);
       // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(target * eased));
+      setValue(Math.round(target * eased * 10) / 10);
 
       if (progress < 1) {
         rafId.current = requestAnimationFrame(animate);
