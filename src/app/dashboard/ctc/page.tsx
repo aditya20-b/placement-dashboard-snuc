@@ -99,6 +99,8 @@ export default function CTCPage() {
     { label: "Median", value: ctc.boxPlot.median },
     { label: "Average", value: Math.round(ctc.boxPlot.average) },
     { label: "P75", value: ctc.boxPlot.p75 },
+    { label: "P90", value: ctc.boxPlot.p90 },
+    { label: "P99", value: ctc.boxPlot.p99 },
     { label: "Max", value: ctc.boxPlot.max },
   ];
   // Vibrant multi-hue for histogram
@@ -197,7 +199,7 @@ export default function CTCPage() {
         </ChartCard>
 
         {/* Box Plot Summary — line chart showing the distribution spread */}
-        <ChartCard title="CTC Distribution Summary" description="Spread across Min, P25, Median, Average, P75, Max">
+        <ChartCard title="CTC Distribution Summary" description="Spread across Min, P25, Median, Average, P75, P90, P99, Max">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={boxPlotData} margin={{ top: 24, right: 20, bottom: 5, left: 10 }}>

@@ -18,7 +18,7 @@ import { parseCTC, parseOfferDate } from "./format";
 function computeBoxPlot(sortedDesc: number[]): BoxPlotStats {
   const asc = [...sortedDesc].reverse();
   const n = asc.length;
-  if (n === 0) return { min: 0, p25: 0, median: 0, p75: 0, max: 0, average: 0 };
+  if (n === 0) return { min: 0, p25: 0, median: 0, p75: 0, p90: 0, p99: 0, max: 0, average: 0 };
   const percentile = (p: number) => {
     const idx = (p / 100) * (n - 1);
     const lo = Math.floor(idx);
@@ -31,6 +31,8 @@ function computeBoxPlot(sortedDesc: number[]): BoxPlotStats {
     p25: percentile(25),
     median: percentile(50),
     p75: percentile(75),
+    p90: percentile(90),
+    p99: percentile(99),
     max: asc[n - 1],
     average,
   };
@@ -158,7 +160,7 @@ export function computeCTCStats(students: StudentRecord[]): CTCStats {
       topNAverages: [],
       percentileValues: [],
       bucketDistribution: [],
-      boxPlot: { min: 0, p25: 0, median: 0, p75: 0, max: 0, average: 0 },
+      boxPlot: { min: 0, p25: 0, median: 0, p75: 0, p90: 0, p99: 0, max: 0, average: 0 },
       ctcByOfferType: [],
       ctcByClass: [],
     };

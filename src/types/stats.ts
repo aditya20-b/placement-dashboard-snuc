@@ -38,6 +38,8 @@ export interface BoxPlotStats {
   p25: number;
   median: number;
   p75: number;
+  p90: number;
+  p99: number;
   max: number;
   average: number;
 }
