@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://placement-dashboard-snuc.vercel.app/:path*",
+      "permanent": true
+    }
+  ]
+}
