@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface GroupByClassContextValue {
   groupByClass: boolean;
@@ -29,7 +30,9 @@ export function GroupByClassProvider({ children }: { children: ReactNode }) {
 
   return (
     <GroupByClassContext.Provider value={{ groupByClass, toggleGroupByClass }}>
-      {children}
+      <TooltipProvider delayDuration={200}>
+        {children}
+      </TooltipProvider>
     </GroupByClassContext.Provider>
   );
 }

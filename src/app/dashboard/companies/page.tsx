@@ -15,6 +15,11 @@ import { useGroupByClass } from "@/contexts/group-by-class-context";
 import { Input } from "@/components/ui/input";
 import { Search, Info } from "lucide-react";
 import {
+  Tooltip as UITooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import {
   BarChart,
   Bar,
   XAxis,
@@ -44,20 +49,25 @@ type CompanyRow = {
   offerDates: string[];
   visitedOnly: boolean;
   offCampus: boolean;
+  companyType: string;
+  companyDescription: string;
 };
 
 export default function CompaniesPage() {
   const { data, isLoading, error } = useDashboardData();
   const { groupByClass } = useGroupByClass();
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"all" | "Product Based" | "Service Based">("all");
 
   const filteredCompanies = useMemo(() => {
     if (!data) return [];
     const q = search.toLowerCase();
-    return data.companies.filter((c) =>
-      c.company.toLowerCase().includes(q)
-    );
-  }, [data, search]);
+    return data.companies.filter((c) => {
+      if (!c.company.toLowerCase().includes(q)) return false;
+      if (typeFilter !== "all" && c.companyType !== typeFilter) return false;
+      return true;
+    });
+  }, [data, search, typeFilter]);
 
   const companyRows = useMemo<CompanyRow[]>(
     () =>
@@ -80,6 +90,8 @@ export default function CompaniesPage() {
         offerDates: c.offerDates,
         visitedOnly: c.visitedOnly ?? false,
         offCampus: c.offCampus ?? false,
+        companyType: c.companyType ?? "",
+        companyDescription: c.companyDescription ?? "",
       })),
     [filteredCompanies]
   );
@@ -104,6 +116,8 @@ export default function CompaniesPage() {
   const avgPerCompany =
     totalCompanies > 0 ? (totalOffers / totalCompanies).toFixed(2) : "0";
   const offCampusCount = companies.filter((c) => c.offCampus).length;
+  const productCount = companies.filter((c) => c.companyType === "Product Based").length;
+  const serviceCount = companies.filter((c) => c.companyType === "Service Based").length;
 
   // All companies for stacked bar chart
   // When grouped: merge "AIDS A" + "AIDS B" → "AIDS", "IOT A" + "IOT B" → "IOT"
@@ -150,13 +164,18 @@ export default function CompaniesPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid gap-3 grid-cols-3">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <StatCard title="Companies Visited" value={totalCompanies} />
         <StatCard title="Total Offers" value={totalOffers} />
         <StatCard
           title="Avg Offers / Company"
           value={Number(avgPerCompany)}
           format={(v) => v.toFixed(2)}
+        />
+        <StatCard
+          title="Product / Service"
+          value={productCount}
+          format={(v) => `${v} / ${serviceCount}`}
         />
       </div>
 
@@ -198,8 +217,8 @@ export default function CompaniesPage() {
         title="Company Directory"
         description={offCampusCount > 0 ? `Includes ${offCampusCount} off-campus compan${offCampusCount === 1 ? "y" : "ies"}` : undefined}
       >
-        <div className="mb-4">
-          <div className="relative">
+        <div className="mb-4 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search companies..."
@@ -207,6 +226,21 @@ export default function CompaniesPage() {
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
             />
+          </div>
+          <div className="flex gap-1.5 shrink-0">
+            {([["all", "All"], ["Product Based", "Product"], ["Service Based", "Service"]] as const).map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setTypeFilter(value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                  typeFilter === value
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
         <div className="max-h-96 overflow-auto">
@@ -229,6 +263,28 @@ export default function CompaniesPage() {
                   <TableCell className="font-medium">
                     <div className="flex items-center flex-wrap gap-1">
                       <span className="truncate max-w-35 sm:max-w-none">{row.company}</span>
+                      {row.companyDescription && (
+                        <UITooltip>
+                          <TooltipTrigger asChild>
+                            <span className="shrink-0 cursor-help">
+                              <Info className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-64">
+                            {row.companyDescription}
+                          </TooltipContent>
+                        </UITooltip>
+                      )}
+                      {row.companyType === "Product Based" && (
+                        <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600 border border-blue-200 shrink-0">
+                          Product
+                        </span>
+                      )}
+                      {row.companyType === "Service Based" && (
+                        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-600 border border-emerald-200 shrink-0">
+                          Service
+                        </span>
+                      )}
                       {row.visitedOnly && (
                         <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 shrink-0">
                           No Hires
