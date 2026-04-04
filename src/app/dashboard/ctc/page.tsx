@@ -27,6 +27,12 @@ import {
   ReferenceLine,
   LabelList,
 } from "recharts";
+import { Info } from "lucide-react";
+import {
+  Tooltip as UITooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import {
   Table,
   TableBody,
@@ -37,7 +43,7 @@ import {
 } from "@/components/ui/table";
 
 type PercentileRow = { percent: number; average: number };
-type TopOfferRow = { rank: number; company: string; ctc: number; offerType: string };
+type TopOfferRow = { rank: number; company: string; ctc: number; offerType: string; companyType: string; companyDescription: string };
 
 export default function CTCPage() {
   const { data, isLoading, error } = useDashboardData();
@@ -60,6 +66,8 @@ export default function CTCPage() {
       company: o.company,
       ctc: o.ctc,
       offerType: o.offerType,
+      companyType: o.companyType ?? "",
+      companyDescription: o.companyDescription ?? "",
     }));
   }, [data]);
   const topOfferSort = useTableSort<TopOfferRow, "company" | "ctc" | "offerType">(topOfferRows);
@@ -256,7 +264,23 @@ export default function CTCPage() {
             {topOfferSort.sortedData.map((offer, i) => (
               <TableRow key={i}>
                 <TableCell>{i + 1}</TableCell>
-                <TableCell className="font-medium">{offer.company}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-1">
+                    <span>{offer.company}</span>
+                    {offer.companyDescription && (
+                      <UITooltip>
+                        <TooltipTrigger asChild>
+                          <span className="shrink-0 cursor-help">
+                            <Info className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-64">
+                          {offer.companyDescription}
+                        </TooltipContent>
+                      </UITooltip>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="text-right font-mono">
                   {formatINRCompact(offer.ctc)}
                 </TableCell>
