@@ -7,6 +7,7 @@ export type {
   Choice,
   Status,
   OfferType,
+  CompanyType,
   Offer,
   StudentRecord,
   AnonymizedStudentRecord,

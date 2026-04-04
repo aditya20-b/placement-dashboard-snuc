@@ -65,6 +65,8 @@ export interface CompanyStats {
   offerDates: string[];
   ctcValues: number[];
   percentage: number;
+  companyType: string;
+  companyDescription: string;
   visitedOnly?: boolean;
   offCampus?: boolean;
 }
@@ -73,6 +75,8 @@ export interface TopOffer {
   company: string;
   ctc: number;
   offerType: OfferType;
+  companyType: string;
+  companyDescription: string;
 }
 
 export interface MultipleOfferStudent {

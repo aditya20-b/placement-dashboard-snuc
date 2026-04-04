@@ -73,7 +73,7 @@ export async function fetchOfferDetails(): Promise<OfferDetailSheetRow[]> {
   const sheets = getSheets();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    range: "Offer_Details!A2:F",
+    range: "Offer_Details!A2:H",
   });
 
   const rows = res.data.values ?? [];
@@ -84,6 +84,8 @@ export async function fetchOfferDetails(): Promise<OfferDetailSheetRow[]> {
     ctcStipend: row[OFFER_COLUMNS.CTC_STIPEND] ?? "",
     offerType: row[OFFER_COLUMNS.OFFER_TYPE] ?? "",
     offerDate: row[OFFER_COLUMNS.OFFER_DATE] ?? "",
+    companyType: row[OFFER_COLUMNS.COMPANY_TYPE] ?? "",
+    description: row[OFFER_COLUMNS.DESCRIPTION] ?? "",
   }));
 }
 
@@ -91,7 +93,7 @@ export async function fetchNoOfferCompanies(): Promise<NoOfferCompanyRow[]> {
   const sheets = getSheets();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    range: "No_Offers_Company!B2:D",
+    range: "No_Offers_Company!B2:F",
   });
 
   const rows = res.data.values ?? [];
@@ -101,6 +103,8 @@ export async function fetchNoOfferCompanies(): Promise<NoOfferCompanyRow[]> {
       company: row[0]?.trim() ?? "",
       visitDate: row[1]?.trim() ?? "",
       ctcStipend: row[2]?.trim() ?? "",
+      companyType: row[3]?.trim() ?? "",
+      description: row[4]?.trim() ?? "",
     }));
 }
 

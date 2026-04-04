@@ -150,6 +150,8 @@ export const OFFER_COLUMNS = {
   CTC_STIPEND: 3,
   OFFER_TYPE: 4,
   OFFER_DATE: 5,
+  COMPANY_TYPE: 6,
+  DESCRIPTION: 7,
 } as const;
 
 // ─── Drive Constants ────────────────────────────────────

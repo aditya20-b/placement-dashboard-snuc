@@ -12,6 +12,7 @@ import type {
   Choice,
   Status,
   OfferType,
+  CompanyType,
 } from "@/types";
 import { OFFER_TYPE_RANK, VALID_OFFER_TYPES } from "./constants";
 import { parseCTC, parseOfferDate } from "./format";
@@ -102,6 +103,8 @@ export function joinStudentRecords(
       offerType: parseOfferType(row.offerType),
       offerDate: parseOfferDate(row.offerDate),
       offCampus: isOffCampus(row.company),
+      companyType: (row.companyType?.trim() || "") as CompanyType,
+      companyDescription: row.description?.trim() || "",
     };
     const existing = offersByRoll.get(rollNo) ?? [];
     existing.push(offer);

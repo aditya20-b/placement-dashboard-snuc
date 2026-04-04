@@ -263,7 +263,7 @@ export function computeCompanyStats(
 ): CompanyStats[] {
   const companyMap = new Map<
     string,
-    { offers: number; dates: Set<string>; ctcs: number[]; offCampusCount: number }
+    { offers: number; dates: Set<string>; ctcs: number[]; offCampusCount: number; companyType: string; companyDescription: string }
   >();
 
   const totalOffers = students.reduce((sum, s) => sum + s.offers.length, 0);
@@ -276,11 +276,15 @@ export function computeCompanyStats(
         dates: new Set<string>(),
         ctcs: [],
         offCampusCount: 0,
+        companyType: "",
+        companyDescription: "",
       };
       existing.offers++;
       if (offer.offCampus) existing.offCampusCount++;
       if (offer.offerDate) existing.dates.add(offer.offerDate);
       if (offer.ctc > 0) existing.ctcs.push(offer.ctc);
+      if (!existing.companyType && offer.companyType) existing.companyType = offer.companyType;
+      if (!existing.companyDescription && offer.companyDescription) existing.companyDescription = offer.companyDescription;
       companyMap.set(company, existing);
     }
   }
@@ -296,6 +300,8 @@ export function computeCompanyStats(
         dates: date ? new Set([date]) : new Set(),
         ctcs: ctc > 0 ? [ctc] : [],
         offCampusCount: 0,
+        companyType: row.companyType ?? "",
+        companyDescription: row.description ?? "",
       });
       noOfferSet.add(row.company);
     }
@@ -308,6 +314,8 @@ export function computeCompanyStats(
       offerDates: Array.from(data.dates).sort(),
       ctcValues: data.ctcs.sort((a, b) => b - a),
       percentage: totalOffers > 0 ? (data.offers / totalOffers) * 100 : 0,
+      companyType: data.companyType,
+      companyDescription: data.companyDescription,
       visitedOnly: noOfferSet.has(company),
       offCampus: HARDCODED_OFF_CAMPUS.has(company) || (data.offers > 0 && data.offCampusCount === data.offers),
     }))
@@ -329,6 +337,8 @@ export function computeTopOffers(
           company: offer.company,
           ctc: offer.ctc,
           offerType: offer.offerType,
+          companyType: offer.companyType,
+          companyDescription: offer.companyDescription,
         });
       }
     }

@@ -17,12 +17,16 @@ export type OfferType =
   | "Marquee"
   | "Internship";
 
+export type CompanyType = "Product Based" | "Service Based" | "";
+
 export interface Offer {
   company: string;
   ctc: number;
   offerType: OfferType;
   offerDate: string | null;
   offCampus: boolean;
+  companyType: CompanyType;
+  companyDescription: string;
 }
 
 /** Joined student record (Master + Offer Details) */

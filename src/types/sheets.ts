@@ -11,7 +11,7 @@ export interface MasterSheetRow {
   company: string;
 }
 
-/** Raw row from "Offer Details" sheet (6 columns) */
+/** Raw row from "Offer Details" sheet (8 columns) */
 export interface OfferDetailSheetRow {
   rollNo: string;
   name: string;
@@ -19,11 +19,15 @@ export interface OfferDetailSheetRow {
   ctcStipend: string;
   offerType: string;
   offerDate: string;
+  companyType: string;
+  description: string;
 }
 
-/** Raw row from "No_Offers_Company" sheet (3 columns) */
+/** Raw row from "No_Offers_Company" sheet (5 columns) */
 export interface NoOfferCompanyRow {
   company: string;
   visitDate: string;
   ctcStipend: string;
+  companyType: string;
+  description: string;
 }
