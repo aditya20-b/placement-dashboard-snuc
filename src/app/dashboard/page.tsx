@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import { DashboardSkeleton } from "@/components/dashboard/loading-skeleton";
@@ -44,6 +44,7 @@ import {
   LabelList,
   LineChart,
   Line,
+  ReferenceDot,
 } from "recharts";
 import {
   Table,
@@ -149,9 +150,18 @@ function mergeClassStats(stats: ClassStats[]): MergedClassStats[] {
   });
 }
 
+const mqSubscribe = (cb: () => void) => {
+  const mql = window.matchMedia("(min-width: 640px)");
+  mql.addEventListener("change", cb);
+  return () => mql.removeEventListener("change", cb);
+};
+const mqSnapshot = () => window.matchMedia("(min-width: 640px)").matches;
+const mqServerSnapshot = () => true;
+
 export default function OverviewPage() {
   const { data, isLoading, error } = useDashboardData();
   const { groupByClass } = useGroupByClass();
+  const isSmUp = useSyncExternalStore(mqSubscribe, mqSnapshot, mqServerSnapshot);
 
   // Hooks must be called before any early returns
   const activeClassStats = useMemo((): MergedClassStats[] => {
@@ -302,6 +312,43 @@ export default function OverviewPage() {
         cumulative: running,
       };
     });
+  })();
+
+  // Milestone dates — based on unique students placed (first offer date per student)
+  // Students with offers but no recorded dates are counted before the first dated entry
+  const placementMilestones = (() => {
+    const firstOfferByDate = new Map<string, number>();
+    let undatedStudents = 0;
+    for (const student of data.students) {
+      if (student.offers.length === 0) continue;
+      const dates = student.offers
+        .map((o) => o.offerDate)
+        .filter((d): d is string => d !== null)
+        .sort();
+      if (dates.length === 0) {
+        undatedStudents++;
+        continue;
+      }
+      const first = dates[0];
+      firstOfferByDate.set(first, (firstOfferByDate.get(first) ?? 0) + 1);
+    }
+    const sorted = Array.from(firstOfferByDate.entries()).sort(([a], [b]) => a.localeCompare(b));
+    let cumStudents = undatedStudents; // front-load undated placed students
+    const milestoneMap = new Map<number, string>(); // pct → formatted date
+    for (const [isoDate, count] of sorted) {
+      cumStudents += count;
+      for (const pct of [25, 50, 75, 85, 90, 100]) {
+        if (milestoneMap.has(pct)) continue;
+        const threshold = Math.round((pct / 100) * totals.opted);
+        if (cumStudents >= threshold) {
+          milestoneMap.set(
+            pct,
+            new Date(isoDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })
+          );
+        }
+      }
+    }
+    return milestoneMap;
   })();
 
   // Offer type breakdown for donut
@@ -668,20 +715,43 @@ export default function OverviewPage() {
 
         {/* Cumulative Offers Timeline */}
         {cumulativeTimeline.length > 0 && (
-          <ChartCard title="Placement Timeline" description="Cumulative offers over the placement season · Off-campus and PPO offers without a recorded date are not shown here">
-            <div className="h-72">
+          <ChartCard title="Placement Timeline" description="Cumulative offers over the placement season · Off-campus and PPO offers without a recorded date are not shown">
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={cumulativeTimeline} margin={{ top: 10, right: 20, bottom: 60, left: 10 }}>
+                <LineChart data={cumulativeTimeline} margin={{ top: 20, right: 15, bottom: 60, left: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" angle={-45} textAnchor="end" height={60} fontSize={10} interval="preserveStartEnd" />
-                  <YAxis yAxisId="left" allowDecimals={false} />
-                  <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
+                  <YAxis yAxisId="left" allowDecimals={false} label={isSmUp ? { value: "Total Offers", angle: -90, position: "insideLeft", fontSize: 11, fill: "#64748b" } : undefined} />
+                  <YAxis yAxisId="right" orientation="right" allowDecimals={false} label={isSmUp ? { value: "New Offers", angle: 90, position: "insideRight", fontSize: 11, fill: "#64748b" } : undefined} />
                   <Tooltip />
                   <Legend />
+                  {[25, 50, 75, 85, 90, 100].map((pct) => {
+                    const milestoneDate = placementMilestones.get(pct);
+                    if (!milestoneDate) return null;
+                    const point = cumulativeTimeline.find((d) => d.date === milestoneDate);
+                    if (!point) return null;
+                    return (
+                      <ReferenceDot
+                        key={pct}
+                        yAxisId="left"
+                        x={point.date}
+                        y={point.cumulative}
+                        r={isSmUp ? 5 : 4}
+                        fill="#16a34a"
+                        stroke="#fff"
+                        strokeWidth={2}
+                        label={{ value: `${pct}%`, position: "top", fontSize: isSmUp ? 10 : 8, fontWeight: 600, fill: "#16a34a" }}
+                      />
+                    );
+                  })}
                   <Line yAxisId="left" type="monotone" dataKey="cumulative" name="Total Offers" stroke={CHART_COLORS.sequential[0]} strokeWidth={2} dot={false} />
                   <Line yAxisId="right" type="monotone" dataKey="newOffers" name="New Offers" stroke={CHART_COLORS.sequential[1]} strokeWidth={1.5} dot={false} strokeDasharray="4 4" />
                 </LineChart>
               </ResponsiveContainer>
+            </div>
+            <div className="flex items-center justify-center gap-1.5 pt-1 text-xs text-muted-foreground">
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-green-600" />
+              Green dots mark placement milestones (% of opted students)
             </div>
           </ChartCard>
         )}
