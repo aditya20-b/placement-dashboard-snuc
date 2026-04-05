@@ -227,7 +227,7 @@ export default function CTCPage() {
 
       {/* CTC by Class — respects groupByClass toggle */}
       {ctcByClassData.length > 0 && (
-        <ChartCard title={`Average CTC by ${groupByClass ? "Class" : "Class Section"}`} description="Best offer per student, excluding internships">
+        <ChartCard title={`Average CTC by ${groupByClass ? "Class" : "Class Section"}`} description="Avg. and median CTC per class · Each student's best non-internship offer is used">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={ctcByClassData} margin={{ top: 24, right: 10, left: 10, bottom: 0 }}>
